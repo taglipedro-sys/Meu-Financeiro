@@ -390,6 +390,17 @@ input:focus,select:focus,button:focus-visible{outline-color:var(--ac)}
 .ai-f{display:flex;gap:8px;align-items:flex-end;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:.5px solid var(--line);flex:none;margin:0}
 .ai-f textarea{flex:1;min-width:0;resize:none;background:var(--in);border:0;border-radius:20px;padding:9px 14px;font:inherit;font-size:16px;line-height:1.35;color:var(--tx);max-height:120px;outline:none}
 .ai-f button{width:40px;height:40px;border-radius:50%;border:0;background:var(--ac);color:#fff;font-size:19px;font-weight:600;flex:none}.ai-f button:disabled{opacity:.4}
+.ai-f .ai-ib{width:34px;height:40px;border:0;background:none;color:var(--ac);flex:none;display:grid;place-items:center;padding:0}.ai-f .ai-ib:disabled{opacity:.4}
+.ai-f svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.ai-f .ai-sb svg{width:21px;height:21px;stroke-width:2.3}
+.ai-f .ai-sb{display:grid;place-items:center;padding:0}.ai-f .ai-sb.mic{background:var(--acs);color:var(--ac)}.ai-f .ai-sb.on{background:var(--r);color:#fff;animation:aipl 1.2s infinite}@keyframes aipl{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--r) 25%,transparent)}}
+.ai-pv{display:flex;gap:8px;overflow-x:auto;padding:8px 12px 0;flex:none}.ai-pv:empty{display:none}
+.ai-pi{position:relative;flex:none;height:56px;min-width:56px;max-width:190px;border-radius:12px;background:var(--in);display:flex;align-items:center;gap:6px;padding:0 28px 0 10px;font-size:13px;overflow:hidden}.ai-pi.im{width:56px;padding:0}
+.ai-pi img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.ai-pi span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-pi button{position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:10px;line-height:20px;padding:0}
+.ai-m .ai-img{display:block;max-width:min(220px,100%);max-height:260px;border-radius:12px;margin:-2px -6px 6px}.ai-m .ai-img:last-child{margin-bottom:-2px}
+.ai-au{display:block}.ai-m audio{display:block;width:240px;max-width:100%;height:38px}.ai-m small.tr{display:block;color:inherit;opacity:.9;margin-top:4px;font-size:13px}
+.ai-fl{display:block;font-size:13px;padding:6px 10px;margin:0 -4px 6px;border-radius:10px;background:rgba(255,255,255,.2)}.ai-fl:last-child{margin-bottom:0}
+.ai-rec{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:40px}.ai-rec b{font-size:16px}.ai-rec small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ai-rd{width:10px;height:10px;border-radius:50%;background:var(--r);animation:aid 1s infinite;flex:none}
 .ai-dots i{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--mu);animation:aid 1s infinite}.ai-dots i:nth-child(2){animation-delay:.15s}.ai-dots i:nth-child(3){animation-delay:.3s}@keyframes aid{50%{opacity:.25}}
 #aj-aip .opt button small{display:block;font-size:11px}
 </style></head><body>
@@ -672,7 +683,7 @@ let FM=null;
 function form(title,fs,v,cb,del,vis){FM={fs,cb,del};let sh=$('#sheet');sh.className='sheet';sh.innerHTML=`<h2>${title}</h2><div class="g">${fs.map(f=>`<div class="${f.w?'full':''}" data-f="${f.n}">${f.t==='check'?'':`<label>${f.l}</label>`}${f.t==='html'?f.h:f.t==='select'?`<select name="${f.n}">${f.o.map(o=>`<option value="${esc(o[0])}" ${String(v[f.n]??'')===String(o[0])?'selected':''}>${esc(o[1])}</option>`).join('')}</select>`:f.t==='check'?`<label class="swl"><input type="checkbox" name="${f.n}" ${v[f.n]?'checked':''}><i class="tg"></i><b>${f.l}</b></label>`:`<input name="${f.n}" type="${f.t||'text'}" step="${f.st||'.01'}" ${f.t==='number'?'inputmode="decimal"':''} ${f.ph?`placeholder="${esc(f.ph)}"`:''} value="${esc(v[f.n]??'')}">`}</div>`).join('')}</div><div class="act"><button class="b2" onclick="closeF()">Cancelar</button>${del?'<button class="bd" onclick="delF()">Excluir</button>':''}<button class="b1" onclick="subF()">Salvar</button></div>`;sh.oninput=sh.onchange=vis||null;$('#modal').classList.add('open');if(vis)vis()}
 function subF(){let o={};FM.fs.forEach(f=>{let e=f.t==='html'?null:document.querySelector(`#sheet [name=${f.n}]`);o[f.n]=f.t==='html'?f.get():f.t==='check'?e.checked:f.t==='number'?+e.value||0:e.value});if(FM.cb(o)===false)return;closeF();save()}
 function delF(){if(FM.del()===false)return;closeF();save()}
-function closeF(){$('#modal').classList.remove('open');if(SY&&SY.pend)setTimeout(syncFlush,0)}
+function closeF(){if($('#sheet').classList.contains('ai'))aiStop();$('#modal').classList.remove('open');if(SY&&SY.pend)setTimeout(syncFlush,0)}
 const N=(l,n,w)=>({n,l,t:'number',w}),S=(n,l,o)=>({n,l,t:'select',o});
 function upd(list,id,o,extra){let x=list.find(y=>y.id===id);if(x)Object.assign(x,o);else list.push({id:nid(),...o,...extra})}
 let TF=null;
@@ -1220,25 +1231,30 @@ function replaceDb(n,msg){try{localStorage.setItem('mf_prev',JSON.stringify(db))
 ask(['Pronto!',(msg||'Os dados foram substituídos.')+(sk?` ${sk} despesa(s) com valor zero foram ignoradas.`:'')+' A versão anterior ficou guardada: dá para desfazer em Ajustes → Dados e backup.'],()=>{},'OK',1)}
 /* Assistente de IA. O usuário escolhe o serviço em Ajustes → Assistente de IA e cola a própria chave (o Pollinations funciona
    sem chave). A cada pergunta vai junto um resumo dos dados: totais já calculados pelo app (a IA não precisa somar de cabeça)
-   e os lançamentos dos meses que importam para a pergunta. A IA só lê; não cria nem altera nada. */
+   e os lançamentos dos meses que importam para a pergunta. A IA só lê; não cria nem altera nada.
+   Anexos: fotos (reduzidas para no máximo 1600 px), PDFs, planilhas e textos, e áudio. O Gemini recebe PDF e áudio direto;
+   nos outros serviços o PDF vira texto (pdf.js), o áudio é transcrito pelo Whisper no Groq ou vira ditado do navegador. */
 const AIP={
-poll:{n:'Pollinations',s:'Sem cadastro',d:'Funciona sem chave e sem cadastro. É grátis, mas pode ficar lento ou recusar perguntas em horários de pico. Para ter mais limite, crie uma chave grátis no site deles e cole abaixo.',m:'openai',opt:1,link:'https://enter.pollinations.ai'},
-gem:{n:'Google Gemini',s:'Chave grátis',d:'Entre com sua conta Google no AI Studio, toque em “Create API key” e cole a chave abaixo. O plano grátis basta para uso pessoal.',m:'gemini-flash-latest',link:'https://aistudio.google.com/apikey'},
-groq:{n:'Groq',s:'Chave grátis',d:'Crie uma conta grátis no Groq, gere uma chave em “API Keys” e cole abaixo. Responde muito rápido.',m:'llama-3.3-70b-versatile',u:'https://api.groq.com/openai/v1/chat/completions',link:'https://console.groq.com/keys'},
-or:{n:'OpenRouter',s:'Modelos grátis',d:'Crie uma conta grátis no OpenRouter e gere uma chave. O modelo padrão, “openrouter/free”, escolhe sozinho um modelo gratuito.',m:'openrouter/free',u:'https://openrouter.ai/api/v1/chat/completions',link:'https://openrouter.ai/keys'},
-cus:{n:'Outra IA',s:'Compatível com OpenAI',d:'Qualquer serviço compatível com a API da OpenAI (ChatGPT, DeepSeek, Mistral, Ollama…). Informe o endereço, a chave e o modelo.',m:''}};
+poll:{n:'Pollinations',s:'Sem cadastro',d:'Funciona sem chave e sem cadastro. É grátis, mas pode ficar lento ou recusar perguntas em horários de pico. Para ter mais limite, crie uma chave grátis no site deles e cole abaixo.',m:'openai',opt:1,link:'https://enter.pollinations.ai',c:'Fotos: sim. PDFs e planilhas: lidos como texto. Áudio: o celular transforma a sua fala em texto.'},
+gem:{n:'Google Gemini',s:'Chave grátis',d:'Entre com sua conta Google no AI Studio, toque em “Create API key” e cole a chave abaixo. O plano grátis basta para uso pessoal.',m:'gemini-flash-latest',link:'https://aistudio.google.com/apikey',c:'Fotos, PDFs, planilhas e áudio: sim. Ele ouve o áudio direto e lê PDFs escaneados.'},
+groq:{n:'Groq',s:'Chave grátis',d:'Crie uma conta grátis no Groq, gere uma chave em “API Keys” e cole abaixo. Responde muito rápido.',m:'llama-3.3-70b-versatile',vm:'meta-llama/llama-4-scout-17b-16e-instruct',u:'https://api.groq.com/openai/v1/chat/completions',link:'https://console.groq.com/keys',c:'Fotos: sim (troca sozinho para um modelo que enxerga imagens). PDFs e planilhas: lidos como texto. Áudio: transcrito pelo Whisper.'},
+or:{n:'OpenRouter',s:'Modelos grátis',d:'Crie uma conta grátis no OpenRouter e gere uma chave. O modelo padrão, “openrouter/free”, escolhe sozinho um modelo gratuito.',m:'openrouter/free',u:'https://openrouter.ai/api/v1/chat/completions',link:'https://openrouter.ai/keys',c:'Fotos: sim (o roteador grátis escolhe um modelo que enxerga). PDFs e planilhas: lidos como texto. Áudio: o celular transforma a sua fala em texto.'},
+cus:{n:'Outra IA',s:'Compatível com OpenAI',d:'Qualquer serviço compatível com a API da OpenAI (ChatGPT, DeepSeek, Mistral, Ollama…). Informe o endereço, a chave e o modelo.',m:'',c:'Fotos: se o modelo enxergar imagens. PDFs e planilhas: lidos como texto. Áudio: o celular transforma a sua fala em texto.'}};
 const AIC=()=>{let a=db.prefs.ai;if(!a||typeof a!=='object')a=db.prefs.ai={p:'poll',k:{},m:{},u:''};if(!AIP[a.p])a.p='poll';if(!a.k)a.k={};if(!a.m)a.m={};return a};
 const aiNeedKey=()=>{let a=AIC();return !AIP[a.p].opt&&!(a.k[a.p]||'').trim()};
 const aiStat=()=>AIP[AIC().p].n+(aiNeedKey()?' · falta a chave':'');
 const AISVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2.5l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2zM18.5 14l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z"/></svg>';
+const aiSv=d=>`<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`,AIIC={clip:aiSv('<path d="M20.5 11.5l-8.3 8.3a5.3 5.3 0 0 1-7.5-7.5l8.3-8.3a3.6 3.6 0 0 1 5.1 5.1l-8.3 8.3a1.8 1.8 0 0 1-2.6-2.6l7.6-7.6"/>'),cam:aiSv('<path d="M3.5 8.5a2 2 0 0 1 2-2h2.3l1.6-2.2h5.2l1.6 2.2h2.3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="3.6"/>'),mic:aiSv('<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>'),up:aiSv('<path d="M12 19V5M6 11l6-6 6 6"/>'),del:aiSv('<path d="M4.5 7h15M10 11v6M14 11v6M6.5 7l1 12.5h9L17.5 7M9.5 7V4.5h5V7"/>')};
 const AISYS=`Você é o assistente financeiro do app "Meu Financeiro", um app pessoal de finanças da casa e do trabalho como motorista de aplicativo.
 Regras:
 - Responda sempre em português do Brasil, curto e direto, como numa conversa de celular.
-- Use só os dados abaixo. Se a informação não estiver neles, diga isso com franqueza e, se der, diga onde ver no app.
+- Use só os dados abaixo e os anexos que o usuário mandar. Se a informação não estiver neles, diga isso com franqueza e, se der, diga onde ver no app.
 - Valores em reais no formato R$ 1.234,56. Diga o período considerado (ex.: "hoje, 02/11" ou "em novembro").
 - Quando um total já vier calculado nos dados, use esse total em vez de somar de cabeça. Se precisar somar, confira a conta.
 - Não invente lançamentos nem valores.
 - Pode usar listas curtas com "-" e destacar números com **negrito**. Não use tabelas.
+- O usuário pode mandar fotos (comprovantes, notas fiscais, boletos, prints), arquivos (PDF de fatura, extrato em planilha ou OFX) e mensagens de voz. Leia o anexo com atenção, diga o que encontrou (valor, data, estabelecimento, vencimento) e, quando fizer sentido, compare com os lançamentos do app: se aquele gasto já foi lançado, se a fatura bate com o que está no app, o que está faltando lançar.
+- Numa mensagem de voz, responda ao que foi dito.
 - Você só lê os dados: não consegue criar, editar ou apagar lançamentos. Se pedirem, explique como fazer no app (botão ＋).`;
 function aiCtx(qs){const td=iso(new Date()),tm=td.slice(0,7),f=money,L=[],DW=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
 const mL=k=>M[+k.slice(5,7)-1].toLowerCase()+' de '+k.slice(0,4),nm=n=>{let a=fa(n);return a?a.name:n||''};
@@ -1275,49 +1291,128 @@ async function aiJ(r){let t=await r.text(),j=null;try{j=JSON.parse(t)}catch(e){}
 if(!r.ok){let m=j&&(j.error&&(j.error.message||j.error)||j.message||j.detail)||t.slice(0,200)||('HTTP '+r.status);let e=new Error(typeof m==='object'?JSON.stringify(m).slice(0,200):String(m));e.st=r.status;throw e}
 if(!j)throw new Error('Resposta inválida do serviço.');return j}
 function aiUrl(u){u=String(u||'').trim().replace(/\/+$/,'');if(!u)throw new Error('URL');if(!/^https:\/\//i.test(u)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(u))throw new Error('O endereço da API precisa começar com https://');return /\/chat\/completions$/.test(u)?u:u+'/chat/completions'}
+/* Mensagem → formato de cada serviço. a.drop marca anexo antigo que não vai mais (para não reenviar fotos a cada pergunta). */
+const AIDEF={img:'Veja a imagem anexada.',aud:'Mensagem de voz anexada: responda ao que foi dito.',doc:'Veja o arquivo anexado.'},aiDef=f=>f.some(a=>a.k==='aud')?AIDEF.aud:f.some(a=>a.k==='img')?AIDEF.img:AIDEF.doc;
+const aiFlT=a=>a.drop?`[${a.n} enviado antes nesta conversa]`:a.k==='aud'?(a.txt!=null?`Mensagem de voz (transcrição): “${a.txt}”`:'[mensagem de voz que este serviço não consegue ouvir]'):`Conteúdo do arquivo “${a.n}”:\n${a.txt||'(sem texto legível)'}`;
+function aiGemParts(m){let f=m.f||[],p=[{text:m.t||aiDef(f)}];f.forEach(a=>{if(a.drop||a.k==='txt')p.push({text:aiFlT(a)});else p.push({inlineData:{mimeType:a.mime,data:a.b64}})});return p}
+function aiOaMsg(m){let f=m.f||[];if(!f.length)return m.t;let au=f.some(a=>a.k==='aud'&&a.txt),c=[];if(m.t||!au)c.push({type:'text',text:m.t||aiDef(f)});
+f.forEach(a=>{if(a.k==='img'&&!a.drop)c.push({type:'image_url',image_url:{url:'data:'+a.mime+';base64,'+a.b64}});else c.push({type:'text',text:aiFlT(a)})});
+return c.some(x=>x.type!=='text')?c:c.map(x=>x.text).join('\n\n')}
 async function aiCall(msgs,sys){let a=AIC(),p=a.p,P=AIP[p],key=(a.k[p]||'').trim(),mdl=(a.m[p]||'').trim()||P.m;
 if(!P.opt&&!key)throw new Error('KEY');if(p==='cus'&&!mdl)throw new Error('MODEL');
-let c=new AbortController(),tmo=setTimeout(()=>c.abort(),90000);
-try{if(p==='gem'){let r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(mdl.replace(/^models\//,''))+':generateContent?key='+encodeURIComponent(key),{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:msgs.map(m=>({role:m.r==='u'?'user':'model',parts:[{text:m.t}]})),generationConfig:{temperature:.2}})}),j=await aiJ(r),
+let c=new AbortController(),tmo=setTimeout(()=>c.abort(),120000);
+try{if(p==='gem'){let r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(mdl.replace(/^models\//,''))+':generateContent?key='+encodeURIComponent(key),{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:msgs.map(m=>({role:m.r==='u'?'user':'model',parts:m.r==='u'?aiGemParts(m):[{text:m.t}]})),generationConfig:{temperature:.2}})}),j=await aiJ(r),
 cn=((j.candidates||[])[0]||{}).content,tx=cn&&(cn.parts||[]).filter(x=>!x.thought).map(x=>x.text||'').join('');if(!tx)throw new Error(j.promptFeedback&&j.promptFeedback.blockReason?'A IA recusou a pergunta ('+j.promptFeedback.blockReason+').':'A IA não devolveu resposta.');return tx}
+if(p==='groq'&&P.vm&&!(a.m[p]||'').trim()&&msgs.some(m=>(m.f||[]).some(x=>x.k==='img'&&!x.drop)))mdl=P.vm;
 let urls=p==='poll'?(key?['https://gen.pollinations.ai/v1/chat/completions']:['https://text.pollinations.ai/openai','https://gen.pollinations.ai/v1/chat/completions']):[p==='cus'?aiUrl(a.u):P.u],
-bd={model:mdl,messages:[{role:'system',content:sys},...msgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}))]},err;if(p!=='poll')bd.temperature=.2;
+bd={model:mdl,messages:[{role:'system',content:sys},...msgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.r==='u'?aiOaMsg(m):m.t}))]},err;if(p!=='poll')bd.temperature=.2;
 for(let u of urls){try{let h={'Content-Type':'application/json'};if(key)h.Authorization='Bearer '+key;
 let r=await fetch(u,{method:'POST',signal:c.signal,headers:h,body:JSON.stringify(bd)}),j=await aiJ(r),ch=(j.choices||[])[0],tx=ch&&ch.message&&ch.message.content;if(Array.isArray(tx))tx=tx.map(x=>x.text||'').join('');if(!tx)throw new Error('A IA não devolveu resposta.');return String(tx).replace(/<think>[\s\S]*?<\/think>/g,'')}catch(e){err=e;if(e.name==='AbortError')throw e}}throw err}finally{clearTimeout(tmo)}}
-/* Erro em linguagem de gente: [mensagem, detalhe técnico, mostrar botão de ajustes] */
+/* Antes de enviar: no Groq o áudio vira texto pelo Whisper; fora do Gemini o PDF vira texto. O resultado fica guardado no anexo. */
+async function aiPrep(h){let a=AIC(),p=a.p,key=(a.k[p]||'').trim();
+for(let m of h)for(let x of m.f||[]){if(x.drop)continue;
+if(x.k==='aud'&&x.txt==null&&p==='groq'&&key&&x.blob)x.txt=await aiStt(x,key);
+if(x.k==='pdf'&&x.txt==null&&p!=='gem')x.txt=await aiPdfTxt(x)}}
+async function aiStt(x,key){let fd=new FormData(),c=new AbortController(),t=setTimeout(()=>c.abort(),90000);fd.append('file',x.blob,'audio.'+(x.mime==='audio/wav'?'wav':(x.mime.split('/')[1]||'webm')));fd.append('model','whisper-large-v3-turbo');fd.append('language','pt');fd.append('response_format','json');
+try{let j=await aiJ(await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',signal:c.signal,headers:{Authorization:'Bearer '+key},body:fd}));return String(j.text||'').trim()}finally{clearTimeout(t)}}
+/* Bibliotecas carregadas só quando precisam: pdf.js (ler PDF) e SheetJS (ler Excel). Versões fixas, com verificação de integridade. */
+const AILIB={pdf:['https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js','sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e'],xls:['https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw']},AILP={};
+const aiLib=k=>AILP[k]||(AILP[k]=new Promise((ok,no)=>{let s=document.createElement('script');s.src=AILIB[k][0];s.integrity=AILIB[k][1];s.crossOrigin='anonymous';s.onload=ok;s.onerror=()=>{delete AILP[k];s.remove();no(new Error('não consegui carregar o leitor de arquivos. Confira a internet e tente de novo.'))};document.head.appendChild(s)}));
+async function aiPdfTxt(x){await aiLib('pdf');pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+let bin=Uint8Array.from(atob(x.b64),c=>c.charCodeAt(0)),d;try{d=await pdfjsLib.getDocument({data:bin}).promise}catch(e){throw new Error(e&&e.name==='PasswordException'?`o PDF “${x.n}” tem senha. Abra, salve sem senha e mande de novo.`:`não consegui ler o PDF “${x.n}”.`)}
+let o=[];for(let i=1;i<=Math.min(d.numPages,40);i++){let pg=await d.getPage(i),c=await pg.getTextContent();o.push(c.items.map(t=>t.str+(t.hasEOL?'\n':' ')).join(''))}
+let t=o.join('\n\n').replace(/[ \t]+/g,' ').trim();return t?t.slice(0,40000):'(o PDF não tem texto: parece ser imagem escaneada. Mande uma foto das páginas ou use o Google Gemini, que lê PDF escaneado.)'}
+const aiB64=b=>new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]||'');r.onerror=()=>no(new Error('não consegui ler o arquivo.'));r.readAsDataURL(b)});
+async function aiImg(f){let u=URL.createObjectURL(f);try{let im=await new Promise((ok,no)=>{let i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error('este navegador não consegue abrir esse formato de imagem.'));i.src=u});
+let s=Math.min(1,1600/Math.max(im.naturalWidth,im.naturalHeight,1)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*s));c.height=Math.max(1,Math.round(im.naturalHeight*s));let g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+let d=c.toDataURL('image/jpeg',.85);return{k:'img',n:f.name||'foto.jpg',mime:'image/jpeg',b64:d.split(',')[1],url:d}}finally{URL.revokeObjectURL(u)}}
+async function aiFile(f){let n=f.name||'arquivo',x=((n.match(/\.(\w+)$/)||[])[1]||'').toLowerCase(),t=f.type||'';
+if(/^image\//.test(t)||/^(jpe?g|png|webp|gif|heic|heif|bmp)$/.test(x))return aiImg(f);
+if(f.size>12e6)throw new Error('o arquivo passa de 12 MB.');
+if(t==='application/pdf'||x==='pdf')return{k:'pdf',n,mime:'application/pdf',b64:await aiB64(f)};
+if(/^(xlsx?|xlsm|ods)$/.test(x)||/spreadsheet|ms-excel/.test(t)){await aiLib('xls');let wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true}),s=wb.SheetNames.slice(0,6).map(h=>`# Planilha ${h}\n`+XLSX.utils.sheet_to_csv(wb.Sheets[h],{FS:';',blankrows:false,dateNF:'dd/mm/yyyy'})).join('\n\n');return{k:'txt',n,txt:s.slice(0,40000)}}
+if(/^text\//.test(t)||/^(csv|tsv|txt|ofx|qif|json|xml|md)$/.test(x)||/json|xml|ofx/.test(t)){let b=await f.arrayBuffer(),s=new TextDecoder('utf-8').decode(b);if(s.includes('�'))s=new TextDecoder('windows-1252').decode(b);return{k:'txt',n,txt:s.slice(0,40000)}}
+throw new Error('esse tipo de arquivo não é aceito. Envie foto, PDF, planilha (Excel ou CSV) ou arquivo de texto (OFX, TXT).')}
+async function aiPick(inp){let fs=[...(inp.files||[])];inp.value='';if(!fs.length)return;AI.prep=1;aiR();
+for(let f of fs){if(AI.att.length>=6){AI.l.push({r:'e',t:'Dá para mandar até 6 anexos por mensagem.'});break}try{AI.att.push(await aiFile(f))}catch(e){AI.l.push({r:'e',t:`Não consegui usar “${f.name||'o arquivo'}”: ${e.message}`})}}
+AI.prep=0;if(aiOn())aiR()}
+/* Áudio: grava pelo microfone e converte para WAV mono de 16 kHz (formato que o Gemini e o Whisper aceitam). */
+async function aiWav(bl){let AC=window.AudioContext||window.webkitAudioContext,ac=new AC(),ab=await bl.arrayBuffer(),buf;try{buf=await new Promise((ok,no)=>ac.decodeAudioData(ab,ok,no))}finally{if(ac.close)ac.close()}
+let sr=16000,oc=new(window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,Math.max(1,Math.ceil(buf.duration*sr)),sr),src=oc.createBufferSource();src.buffer=buf;src.connect(oc.destination);src.start();
+let d=(await oc.startRendering()).getChannelData(0),v=new DataView(new ArrayBuffer(44+d.length*2)),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+w(0,'RIFF');v.setUint32(4,36+d.length*2,true);w(8,'WAVE');w(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,d.length*2,true);
+for(let i=0;i<d.length;i++){let s=Math.max(-1,Math.min(1,d[i]));v.setInt16(44+i*2,s<0?s*0x8000:s*0x7fff,true)}return new Blob([v],{type:'audio/wav'})}
+const aiDur=s=>Math.floor(s/60)+':'+pad2(Math.floor(s%60)),AISR=()=>window.SpeechRecognition||window.webkitSpeechRecognition;
+const AIMICB='O microfone está bloqueado para este site. Libere nas permissões do navegador (o cadeado ao lado do endereço, ou Ajustes do celular → navegador → Microfone) e tente de novo.';
+function aiMic(){let a=AIC(),P=AIP[a.p],rec=navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder;
+if((a.p==='gem'||a.p==='groq')&&rec)return aiRecStart();if(AISR())return aiDict();
+AI.l.push({r:'e',t:a.p==='gem'||a.p==='groq'?'Este navegador não deixa gravar áudio. Use o microfone do teclado do celular para ditar a pergunta.':`O ${P.n} não recebe áudio e este navegador não faz ditado. Para mandar áudio, escolha o Google Gemini ou o Groq em Ajustes → Assistente de IA, ou use o microfone do teclado do celular.`,cfg:a.p!=='gem'&&a.p!=='groq'});aiR()}
+async function aiRecStart(){let st;try{st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){AI.l.push({r:'e',t:e&&e.name==='NotAllowedError'?AIMICB:'Não consegui usar o microfone deste aparelho.'});aiR();return}
+if(!aiOn()){st.getTracks().forEach(t=>t.stop());return}
+let mt=['audio/webm;codecs=opus','audio/mp4','audio/ogg;codecs=opus','audio/webm'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t)),mr;try{mr=new MediaRecorder(st,mt?{mimeType:mt}:undefined)}catch(e){mr=new MediaRecorder(st)}
+let R=AI.rec={mr,st,ch:[],t0:Date.now()};mr.ondataavailable=e=>{if(e.data&&e.data.size)R.ch.push(e.data)};mr.start(250);
+R.iv=setInterval(()=>{let s=(Date.now()-R.t0)/1000,e=$('#airt');if(e)e.textContent=aiDur(s);if(s>=120)aiRecStop(1)},250);if(navigator.vibrate)navigator.vibrate(15);aiR()}
+function aiRecStop(send){let R=AI.rec;if(!R)return;AI.rec=null;clearInterval(R.iv);let dur=(Date.now()-R.t0)/1000,done=0;
+const fin=async()=>{if(done++)return;R.st.getTracks().forEach(t=>t.stop());if(!send)return;
+if(dur<1){AI.prep=0;AI.l.push({r:'e',t:'Áudio curto demais. Toque no microfone, fale e depois toque em ↑ para enviar.'});aiR();return}
+let bl=new Blob(R.ch,{type:R.mr.mimeType||'audio/webm'}),x;
+try{let w=await aiWav(bl);x={k:'aud',n:'Áudio',mime:'audio/wav',blob:w,b64:await aiB64(w),url:URL.createObjectURL(w),dur}}catch(e){x={k:'aud',n:'Áudio',mime:(bl.type||'audio/webm').split(';')[0],blob:bl,b64:await aiB64(bl),url:URL.createObjectURL(bl),dur}}
+AI.prep=0;aiSend(undefined,x)};
+R.mr.onstop=fin;AI.prep=send?1:0;aiR();try{if(R.mr.state!=='inactive')R.mr.stop();else fin()}catch(e){fin()}}
+/* Ditado: o próprio navegador transforma a fala em texto na caixa de pergunta (serviços que não recebem áudio). */
+function aiDict(){let S=AISR(),r=new S(),q=$('#aiq'),base=q?q.value.trim():'';r.lang='pt-BR';r.interimResults=true;r.continuous=true;
+r.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;let x=$('#aiq');if(x){x.value=((base?base+' ':'')+t).trim();x.style.height='auto';x.style.height=x.scrollHeight+'px'}};
+r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){AI.l.push({r:'e',t:AIMICB});if(aiOn())aiR()}};
+r.onend=()=>{if(AI.dict===r){AI.dict=null;aiBtn()}};try{r.start();AI.dict=r}catch(e){}aiBtn()}
+function aiStop(){if(AI.rec)aiRecStop(0);if(AI.dict){let d=AI.dict;AI.dict=null;try{d.stop()}catch(e){}}}
+function aiBtn(){let b=$('#aisb'),q=$('#aiq');if(!b||!q)return;let m=AI.dict?'stop':(q.value.trim()||AI.att.length)?'send':'mic';b.dataset.m=m;b.className='ai-sb'+(m==='mic'?' mic':m==='stop'?' on':'');b.innerHTML=m==='send'?AIIC.up:AIIC.mic;b.setAttribute('aria-label',m==='send'?'Enviar':m==='stop'?'Parar de ouvir':'Gravar áudio');q.placeholder=AI.dict?'Ouvindo… pode falar':'Sua pergunta…'}
+function aiMain(){let m=($('#aisb')||{dataset:{}}).dataset.m;if(m==='send')aiSend();else if(m==='stop'){let d=AI.dict;AI.dict=null;try{d.stop()}catch(e){}aiBtn()}else aiMic()}
+/* Erro em linguagem de gente: mensagem, detalhe técnico e, se ajudar, botão para os ajustes */
 function aiErr(e){let a=AIC(),P=AIP[a.p],m=String(e&&e.message||e),st=e&&e.st,x=m;
 if(m==='KEY')return{r:'e',t:`Para usar o ${P.n}, cole a sua chave de API em Ajustes → Assistente de IA. Se preferir não criar conta, escolha o Pollinations, que funciona sem chave.`,cfg:1};
 if(m==='MODEL'||m==='URL')return{r:'e',t:'Falta informar o '+(m==='URL'?'endereço da API':'modelo')+' da IA em Ajustes → Assistente de IA.',cfg:1};
 if(e&&e.name==='AbortError')return{r:'e',t:`O ${P.n} demorou demais para responder. Tente de novo daqui a pouco.`};
 if(!navigator.onLine)return{r:'e',t:'Sem internet. O assistente precisa de conexão para responder.'};
+if(/^(não consegui|o PDF|este navegador)/.test(m))return{r:'e',t:m.charAt(0).toUpperCase()+m.slice(1)};
+if(st===413||/too large|payload|request entity/i.test(m))return{r:'e',t:`O anexo ficou grande demais para o ${P.n}. Tente uma foto só, ou um PDF com menos páginas.`,x};
 if(st===401||st===403||/api key|apikey|unauthori[sz]ed|invalid.*key|permission/i.test(m))return{r:'e',t:`O ${P.n} recusou a chave. Confira em Ajustes → Assistente de IA se ela foi copiada inteira.`,x,cfg:1};
 if(st===429||/rate|quota|limit/i.test(m))return{r:'e',t:`O limite do plano grátis do ${P.n} foi atingido por agora. Espere um pouco ou troque de serviço em Ajustes → Assistente de IA.`,x,cfg:1};
+if(/image|vision|multimodal|audio/i.test(m))return{r:'e',t:`O modelo que o ${P.n} está usando não entende esse tipo de anexo. Mande só texto, ou use o Google Gemini, que aceita foto, PDF e áudio.`,x,cfg:1};
 if(st===404||/model/i.test(m))return{r:'e',t:`O ${P.n} não encontrou o modelo “${(a.m[a.p]||'').trim()||P.m}”. Deixe o campo Modelo em branco ou troque o nome em Ajustes → Assistente de IA.`,x,cfg:1};
 if(e instanceof TypeError)return{r:'e',t:`Não consegui falar com o ${P.n}.`+(a.p==='poll'?' O serviço sem cadastro pode estar fora do ar ou bloqueado; uma chave grátis do Google Gemini costuma ser mais estável.':' Confira a internet e tente de novo.'),x,cfg:a.p==='poll'||a.p==='cus'};
 return{r:'e',t:`O ${P.n} devolveu um erro.`,x,cfg:1}}
 const aiMd=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^(\s*)[-*]\s+/gm,'$1• ').replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g,'$1$2');
-let AI={l:[],busy:0};
+let AI={l:[],att:[],busy:0,prep:0,rec:null,dict:null};
+const aiOn=()=>$('#sheet').classList.contains('ai')&&$('#modal').classList.contains('open');
 const AISG=['Quanto gastei hoje?','Quanto gastei este mês?','Em que categoria mais gastei este mês?','Quanto ainda falta pagar este mês?','Quanto faturei como motorista este mês?','Gastei mais ou menos que no mês passado?'];
-function aiList(){if(!AI.l.length)return`<div class="ai-hi"><span class="ai-av">${AISVG}</span><b>Pergunte sobre suas finanças</b><span>Respondo com base nos lançamentos, contas, cartões, limites e dias de motorista do app.</span><div class="ai-sg">${AISG.map((s,i)=>`<button type="button" onclick="aiSend(AISG[${i}])">${esc(s)}</button>`).join('')}</div><small style="display:block;margin-top:14px">Usando ${esc(AIP[AIC().p].n)}. Um resumo dos seus dados vai junto com cada pergunta.</small></div>`;
-return AI.l.map(m=>m.r==='e'?`<div class="ai-m e" role="alert">${esc(m.t)}${m.x?`<small style="display:block;margin-top:4px;overflow-wrap:anywhere">${esc(m.x)}</small>`:''}${m.cfg?`<button class="add" onclick="closeF();ajGo('ai')">Abrir ajustes do assistente</button>`:''}</div>`:`<div class="ai-m ${m.r}">${m.r==='a'?aiMd(m.t):esc(m.t)}</div>`).join('')+(AI.busy?'<div class="ai-m a"><span class="ai-dots" role="status" aria-label="Pensando"><i></i><i></i><i></i></span></div>':'')}
-function aiR(){let i=$('#aiq'),v=i?i.value:'',P=AIP[AIC().p];$('#sheet').innerHTML=`<div class="ai-h"><span class="ai-av">${AISVG}</span><div><b>Assistente</b><small>${esc(P.n)} · só lê os dados do app</small></div>${AI.l.length&&!AI.busy?'<button class="ai-hb" onclick="AI.l=[];aiR()">Limpar</button>':''}<button class="ai-hb" onclick="closeF();ajGo('ai')">Ajustes</button><button class="tf-x" onclick="closeF()" aria-label="Fechar">✕</button></div><div class="ai-l" id="ail" aria-live="polite">${aiList()}</div><form class="ai-f" onsubmit="event.preventDefault();aiSend()"><textarea id="aiq" rows="1" placeholder="Pergunte sobre seus gastos…" aria-label="Sua pergunta" enterkeyhint="send" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend()}"></textarea><button type="submit" aria-label="Enviar" ${AI.busy?'disabled':''}>↑</button></form>`;
-let n=$('#aiq');n.value=v;if(v)n.style.height=n.scrollHeight+'px';let l=$('#ail');l.scrollTop=l.scrollHeight}
+const aiAtH=a=>a.k==='img'&&a.url?`<img class="ai-img" src="${esc(a.url)}" alt="Imagem enviada">`:a.k==='aud'?`<span class="ai-au">${a.url?`<audio controls preload="metadata" src="${esc(a.url)}"></audio>`:'🎤 Áudio'}${a.txt?`<small class="tr">“${esc(a.txt)}”</small>`:''}</span>`:`<span class="ai-fl">📄 ${esc(a.n)}</span>`;
+function aiList(){if(!AI.l.length)return`<div class="ai-hi"><span class="ai-av">${AISVG}</span><b>Pergunte sobre suas finanças</b><span>Respondo com base nos lançamentos, contas, cartões, limites e dias de motorista do app. Também dá para mandar foto de comprovante, PDF de fatura, extrato ou áudio.</span><div class="ai-sg">${AISG.map((s,i)=>`<button type="button" onclick="aiSend(AISG[${i}])">${esc(s)}</button>`).join('')}</div><small style="display:block;margin-top:14px">Usando ${esc(AIP[AIC().p].n)}. Um resumo dos seus dados vai junto com cada pergunta.</small></div>`;
+return AI.l.map(m=>m.r==='e'?`<div class="ai-m e" role="alert">${esc(m.t)}${m.x?`<small style="display:block;margin-top:4px;overflow-wrap:anywhere">${esc(m.x)}</small>`:''}${m.cfg?`<button class="add" onclick="closeF();ajGo('ai')">Abrir ajustes do assistente</button>`:''}</div>`:m.r==='u'?`<div class="ai-m u">${(m.f||[]).map(aiAtH).join('')}${m.t?esc(m.t):''}</div>`:`<div class="ai-m a">${aiMd(m.t)}</div>`).join('')+(AI.busy?'<div class="ai-m a"><span class="ai-dots" role="status" aria-label="Pensando"><i></i><i></i><i></i></span></div>':'')}
+const aiPv=()=>AI.att.map((a,i)=>`<div class="ai-pi ${a.k==='img'?'im':''}">${a.k==='img'?`<img src="${esc(a.url)}" alt="">`:`<span>📄 ${esc(a.n)}</span>`}<button type="button" onclick="AI.att.splice(${i},1);aiR()" aria-label="Tirar ${esc(a.n)}">✕</button></div>`).join('')+(AI.prep?'<div class="ai-pi"><span class="spin" aria-hidden="true">◌</span><span>Preparando…</span></div>':'');
+function aiR(){let i=$('#aiq'),v=AI.draft=i?i.value:(AI.draft||''),P=AIP[AIC().p],R=AI.rec;
+$('#sheet').innerHTML=`<div class="ai-h"><span class="ai-av">${AISVG}</span><div><b>Assistente</b><small>${esc(P.n)} · só lê os dados do app</small></div>${AI.l.length&&!AI.busy?'<button class="ai-hb" onclick="AI.l=[];aiR()">Limpar</button>':''}<button class="ai-hb" onclick="closeF();ajGo('ai')">Ajustes</button><button class="tf-x" onclick="closeF()" aria-label="Fechar">✕</button></div><div class="ai-l" id="ail" aria-live="polite">${aiList()}</div>`+
+(R?`<div class="ai-f"><button type="button" class="ai-ib" onclick="aiRecStop(0)" aria-label="Apagar gravação">${AIIC.del}</button><div class="ai-rec" role="status"><span class="ai-rd" aria-hidden="true"></span><b id="airt">${aiDur((Date.now()-R.t0)/1000)}</b><small>Gravando… toque em ↑ para enviar</small></div><button type="button" class="ai-sb" onclick="aiRecStop(1)" aria-label="Enviar áudio">${AIIC.up}</button></div>`
+:`<div class="ai-pv">${aiPv()}</div><form class="ai-f" onsubmit="event.preventDefault();aiSend()"><button type="button" class="ai-ib" onclick="$('#aifl').click()" aria-label="Mandar arquivo ou foto da galeria" ${AI.busy?'disabled':''}>${AIIC.clip}</button><button type="button" class="ai-ib" onclick="$('#aicm').click()" aria-label="Tirar foto" ${AI.busy?'disabled':''}>${AIIC.cam}</button><textarea id="aiq" rows="1" placeholder="Sua pergunta…" aria-label="Sua pergunta" enterkeyhint="send" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';aiBtn()" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend()}"></textarea><button type="button" id="aisb" class="ai-sb" onclick="aiMain()" ${AI.busy||AI.prep?'disabled':''}></button><input type="file" id="aifl" hidden multiple accept="image/*,application/pdf,.pdf,.csv,.tsv,.txt,.ofx,.qif,.json,.xml,.xls,.xlsx,.ods,text/*" onchange="aiPick(this)"><input type="file" id="aicm" hidden accept="image/*" capture="environment" onchange="aiPick(this)"></form>`);
+let n=$('#aiq');if(n){n.value=v;if(v)n.style.height=n.scrollHeight+'px';aiBtn()}let l=$('#ail');l.scrollTop=l.scrollHeight}
 function aiOpen(){fabT(false);let sh=$('#sheet');sh.className='sheet ai';sh.oninput=sh.onchange=null;aiR();$('#modal').classList.add('open');if(matchMedia('(min-width:700px)').matches)setTimeout(()=>{let i=$('#aiq');if(i)i.focus()},60)}
-async function aiSend(q){let i=$('#aiq');q=String(q??(i?i.value:'')).trim();if(!q||AI.busy)return;if(i){i.value='';i.style.height=''}
-let h=[];for(let j=0;j<AI.l.length-1;j++)if(AI.l[j].r==='u'&&AI.l[j+1].r==='a')h.push(AI.l[j],AI.l[j+1]);h=h.slice(-8);h.push({r:'u',t:q});
-AI.l.push({r:'u',t:q});AI.busy=1;aiR();
-try{let tx=await aiCall(h,AISYS+'\n\n# Dados do app\n'+aiCtx(h.filter(m=>m.r==='u').slice(-3).map(m=>m.t).join(' ')));AI.l.push({r:'a',t:tx.trim()})}catch(e){AI.l.push(aiErr(e))}
-AI.busy=0;if($('#sheet').classList.contains('ai')&&$('#modal').classList.contains('open'))aiR()}
+async function aiSend(q,au){let i=$('#aiq');if(AI.dict){let d=AI.dict;AI.dict=null;try{d.stop()}catch(e){}}
+q=String(q??(i?i.value:'')).trim();let f=[...AI.att,...(au?[au]:[])];if((!q&&!f.length)||AI.busy||AI.prep)return;if(i){i.value='';i.style.height=''}AI.att=[];AI.draft='';
+let um={r:'u',t:q,f},h=[];for(let j=0;j<AI.l.length-1;j++)if(AI.l[j].r==='u'&&AI.l[j+1].r==='a')h.push(AI.l[j],AI.l[j+1]);h=h.slice(-8);h.push(um);
+/* anexos só das 3 últimas perguntas vão de novo; os mais antigos viram uma nota (o áudio já transcrito continua como texto) */
+let nu=0;h=h.reverse().map(m=>m.r!=='u'||++nu<=3||!(m.f||[]).length?m:{...m,f:m.f.map(a=>a.k==='aud'&&a.txt!=null?a:{k:a.k,n:a.n,drop:1})}).reverse();
+AI.l.push(um);AI.busy=1;aiR();
+try{await aiPrep(h);let qs=h.filter(m=>m.r==='u').slice(-3).map(m=>m.t+' '+(m.f||[]).map(a=>a.k==='aud'&&a.txt||'').join(' ')).join(' '),tx=await aiCall(h,AISYS+'\n\n# Dados do app\n'+aiCtx(qs));AI.l.push({r:'a',t:tx.trim()})}catch(e){AI.l.push(aiErr(e))}
+AI.busy=0;if(aiOn())aiR()}
 async function aiTest(b){let o=$('#aitr');b.disabled=true;o.className='';o.textContent='Testando…';
 try{let t=await aiCall([{r:'u',t:'Responda só com a palavra OK.'}],'Teste de conexão.');o.className='gr';o.textContent='Funcionou! Resposta: '+String(t).replace(/[*#]/g,'').trim().slice(0,80)}catch(e){let r=aiErr(e);o.className='rd';o.textContent=r.t+(r.x?' ('+r.x+')':'')}b.disabled=false}
 function aiCfg(){let a=AIC(),p=a.p,P=AIP[p];
 return`<div class="card" id="aj-aip"><h2>Qual IA usar</h2><small>É ela que responde às perguntas feitas no botão ✦, no canto da tela.</small><div class="opt" style="margin-top:10px">${AIK.map(k=>`<button class="${k===p?'on':''}" onclick="AIC().p='${k}';save()">${AIP[k].n}<small>${AIP[k].s}</small></button>`).join('')}</div></div>
-<div class="card" id="aj-aik"><h2>${esc(P.n)}</h2><small>${esc(P.d)}</small>${P.link?`<a class="add" style="display:block;text-align:center;text-decoration:none" href="${P.link}" target="_blank" rel="noopener">Criar chave em ${P.link.replace(/^https:\/\//,'')} ↗</a>`:''}
+<div class="card" id="aj-aik"><h2>${esc(P.n)}</h2><small>${esc(P.d)}</small><small style="display:block;margin-top:8px" id="aj-aia"><b>Anexos:</b> ${esc(P.c)}</small>${P.link?`<a class="add" style="display:block;text-align:center;text-decoration:none" href="${P.link}" target="_blank" rel="noopener">Criar chave em ${P.link.replace(/^https:\/\//,'')} ↗</a>`:''}
 ${p==='cus'?`<label style="margin-top:12px">Endereço da API</label><input value="${esc(a.u)}" placeholder="https://api.openai.com/v1" onchange="AIC().u=this.value.trim();persist()" autocomplete="off" spellcheck="false" inputmode="url">`:''}
 <label style="margin-top:12px">Chave de API${P.opt?' (opcional)':''}</label><input type="password" value="${esc(a.k[p]||'')}" placeholder="${P.opt?'Pode deixar em branco':'Cole aqui a sua chave'}" onchange="AIC().k['${p}']=this.value.trim();persist()" autocomplete="off" spellcheck="false">
-<label style="margin-top:12px">Modelo</label><input value="${esc(a.m[p]||'')}" placeholder="${esc(P.m||'ex.: gpt-4o-mini')}" onchange="AIC().m['${p}']=this.value.trim();persist()" autocomplete="off" spellcheck="false"><small style="display:block;margin-top:6px">${P.m?'Deixe em branco para usar o padrão ('+esc(P.m)+').':'Nome do modelo, como aparece na documentação do serviço.'}</small>
+<label style="margin-top:12px">Modelo</label><input value="${esc(a.m[p]||'')}" placeholder="${esc(P.m||'ex.: gpt-4o-mini')}" onchange="AIC().m['${p}']=this.value.trim();persist()" autocomplete="off" spellcheck="false"><small style="display:block;margin-top:6px">${P.m?'Deixe em branco para usar o padrão ('+esc(P.m)+(P.vm?'; com foto, '+esc(P.vm):'')+').':'Nome do modelo, como aparece na documentação do serviço.'}</small>
 <button class="add" onclick="aiTest(this)">Testar conexão</button><small id="aitr" role="status" style="display:block;margin-top:6px"></small></div>
-<div class="card"><h2>Privacidade</h2><small>Nada é enviado enquanto você não pergunta. A cada pergunta, o app manda ao serviço escolhido um resumo dos seus dados: totais por mês e por categoria, saldos, cartões, limites, dias de motorista e os lançamentos dos meses ligados à pergunta. A chave fica salva na sua conta junto com os outros ajustes, mas não vai nos backups exportados. O assistente só lê: não cria, altera nem apaga nada.</small></div>`}
+<div class="card"><h2>Privacidade</h2><small>Nada é enviado enquanto você não pergunta. A cada pergunta, o app manda ao serviço escolhido um resumo dos seus dados: totais por mês e por categoria, saldos, cartões, limites, dias de motorista e os lançamentos dos meses ligados à pergunta. Fotos, arquivos e áudios só vão quando você os manda, e não ficam guardados no app: a conversa some quando o app é fechado. A chave fica salva na sua conta junto com os outros ajustes, mas não vai nos backups exportados. O assistente só lê: não cria, altera nem apaga nada.</small></div>`}
 applyTheme();render();
 setInterval(()=>{if(document.visibilityState==='visible'&&IC().auto&&['wealth','home'].includes(page)&&!$('#modal').classList.contains('open'))qRefresh()},60000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&IC().auto&&Date.now()-QS.at>60000)qRefresh()});
