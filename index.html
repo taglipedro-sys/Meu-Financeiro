@@ -53,6 +53,17 @@ label{display:block;color:var(--mu);font-size:11px;margin-bottom:4px}input,selec
 .tf-ic{width:44px;height:44px;border-radius:50%;background:var(--in);border:1px solid var(--line);display:grid;place-items:center;font-size:20px;flex:none}.tf-ic.plain{background:none;border:0;color:var(--mu);width:28px}
 .tf-n{flex:1;min-width:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tf-ch{color:var(--mu);font-size:22px}
 .tf-pick select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.tf-pb{display:flex;width:100%;background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
+.acl{margin-top:10px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--in);max-height:320px;overflow-y:auto}
+.acl .ach{padding:10px 14px 4px;font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+.acl button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:7px 14px;background:none;border:0;color:var(--tx);font-size:15px;text-align:left;cursor:pointer}
+.acl button+button{border-top:1px solid var(--line)}
+.acl button.on{background:color-mix(in srgb,var(--b) 16%,transparent);font-weight:700}
+.acl button:focus-visible{outline:2px solid var(--b);outline-offset:-2px}
+.acl button>.bub,.fm button>.bub,.fp>.bub{width:32px;height:32px;font-size:13px;margin:0;flex:none}
+.acl .acn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acl .ack{color:var(--b);font-weight:800}
+.fm button{display:flex;align-items:center;gap:10px}.fp>.bub{width:20px;height:20px;font-size:9px;margin-right:6px}
 .tf-in{flex:1;min-width:0;background:none;border:0;padding:0;font-size:16px}
 .tf-chips{display:flex;gap:10px;flex-wrap:wrap}.tf-chip{position:relative;display:inline-block;margin:0;border:1.5px solid var(--line);background:none;border-radius:22px;padding:9px 18px;font-weight:700;font-size:14px;color:var(--mu);cursor:pointer}
 .tf-chip.on{border-color:var(--g);background:var(--gb);color:var(--g)}.tf-chip input{position:absolute;inset:0;width:100%;height:100%;opacity:0;padding:0;cursor:pointer}
@@ -322,6 +333,10 @@ const an=n=>{let a=fa(n);return a?(a.icon||(db.accts.includes(a)?'🏦':'💳'))
 const cat=id=>db.cats.find(c=>c.id===id)||{name:'Sem categoria',icon:'•'};
 const ini=a=>(a.abbr||String(a.name||'?').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')).toUpperCase().slice(0,3);
 const aico=(a,c='')=>{if(!a)return'';let d=db.accts.includes(a)?'🏦':'💳';if(a.logo)return`<span class="bub ${c}" style="background:${esc(a.bg||'#fff')}"><img src="${esc(a.logo)}" alt=""></span>`;if(a.color)return`<span class="bub ${c}" style="background:${esc(a.color)};border-color:transparent">${esc(ini(a))}</span>`;return`<span class="bub e ${c}">${esc(a.icon||d)}</span>`};
+/* Lista de contas/cartões com o ícone escolhido pelo usuário. pick(id) devolve o JS do onclick. */
+function acList(cur,pick,o={}){let it=a=>`<button type="button" role="option" aria-selected="${a.id===cur}" class="${a.id===cur?'on':''}" onclick="${pick(a.id)}">${aico(a)}<span class="acn">${esc(a.name)}</span>${a.id===cur?'<span class="ack">✓</span>':''}</button>`,h='';
+if(o.none)h+=`<button type="button" role="option" aria-selected="${!cur}" class="${!cur?'on':''}" onclick="${pick('')}"><span class="bub e">•</span><span class="acn">${esc(o.none)}</span>${!cur?'<span class="ack">✓</span>':''}</button>`;
+if(db.accts.length)h+=`<div class="ach">Contas</div>`+db.accts.map(it).join('');if(o.cards!==false&&db.cards.length)h+=`<div class="ach">${esc(o.cardsLabel||'Cartões')}</div>`+db.cards.map(it).join('');return`<div class="acl" role="listbox">${h}</div>`}
 const anH=n=>{let a=fa(n);return a?aico(a)+esc(a.name):esc(n||'')};
 function totals(ym){let t=db.tx.filter(x=>x.date.startsWith(ym)),d=db.days.filter(x=>x.date.startsWith(ym)),g=sum(d,x=>x.uber+x.n99+x.part);
 return{inc:sum(t.filter(x=>x.type==='income'&&!cat(x.cat).drv),x=>x.amount)+g,exp:sum(t.filter(x=>x.type==='expense'&&!cat(x.cat).inv),x=>x.amount),pend:sum(t.filter(x=>x.type==='expense'&&!x.paid&&!cat(x.cat).inv),x=>x.amount),apl:sum(t.filter(x=>x.type==='expense'&&cat(x.cat).inv),x=>x.amount),gross:g,fuel:sum(d,x=>x.fuel),hours:sum(d,x=>x.hours),km:sum(d,x=>x.km),n:d.length,tx:t,days:d}}
@@ -367,11 +382,11 @@ const r2=v=>Math.round(v*100)/100;
 function eff(t,s){let add=(n,v)=>{let a=db.accts.find(x=>x.id===n);if(a){a.balance=r2(a.balance+v);return}let c=db.cards.find(x=>x.id===n);if(c)c.used=r2((+c.used||0)-v)},m=t.amount*s;if(t.type==='income')add(t.acct,m);else if(t.type==='expense')add(t.acct,-m);else{add(t.from,-m);add(t.to,m)}}
 function pay(id){let t=db.tx.find(x=>x.id===id);t.paid=!t.paid;eff(t,t.paid?1:-1);save()}
 const FN={o:'Origem',t:'Tipo',c:'Categorias',g:'Tags'},isInst=t=>t.kind==='inst'||/\(\d+\/\d+\)$/.test(t.desc||''),isFix=t=>t.kind==='fixed'||(t.gid&&!isInst(t));
-const fops={o:()=>[{v:'all',l:'Todas contas/cartões'},{h:'Contas'},...db.accts.map(a=>({v:a.id,l:an(a.id)})),{h:'Cartões'},...db.cards.map(c=>({v:c.id,l:an(c.id)}))],
+const fops={o:()=>[{v:'all',l:'Todas contas/cartões'},{h:'Contas'},...db.accts.map(a=>({v:a.id,l:a.name,a})),{h:'Cartões'},...db.cards.map(c=>({v:c.id,l:c.name,a:c}))],
 t:()=>[['all','Todos os lançamentos'],['income','Receitas'],['income_p','Receitas recebidas'],['income_o','Receitas não recebidas'],['expense','Despesas'],['expense_p','Despesas pagas'],['expense_o','Despesas não pagas'],['transfer','Transferências'],['transfer_p','Transferências pagas'],['transfer_o','Transferências não pagas'],['fixed','Lançamentos fixos'],['inst','Lançamentos parcelados'],['tag','Lançamentos com marcadores']].map(x=>({v:x[0],l:x[1]})),
 c:()=>[{v:'all',l:'Todas categorias'},{h:'Categorias de despesa'},...db.cats.filter(c=>c.type==='expense').map(c=>({v:c.id,l:c.icon+' '+c.name})),{h:'Categorias de receita'},...db.cats.filter(c=>c.type==='income').map(c=>({v:c.id,l:c.icon+' '+c.name}))],
 g:()=>{let a=[...new Set(db.tx.flatMap(t=>t.tags||[]))].sort();return[{v:'all',l:'Todas as tags'},...(a.length?[{h:'Tags'}]:[{h:'Nenhuma tag criada ainda'}]),...a.map(x=>({v:x,l:'# '+x}))]}};
-function fbar(){return Object.keys(FN).map(k=>{let o=fops[k](),cu=o.find(x=>x.v===fl[k]),act=fl[k]!=='all';return`<div class="fd"><button class="fp ${act?'on':''}" onclick="tgF('${k}')">${esc(act&&cu?cu.l:FN[k])} ▾</button>${ddk===k?`<div class="fm">${o.map((x,i)=>x.h?`<div class="fh">${esc(x.h)}</div>`:`<button class="${x.v===fl[k]?'on':''}" onclick="pickF('${k}',${i})">${esc(x.l)}</button>`).join('')}</div>`:''}</div>`}).join('')}
+function fbar(){return Object.keys(FN).map(k=>{let o=fops[k](),cu=o.find(x=>x.v===fl[k]),act=fl[k]!=='all';return`<div class="fd"><button class="fp ${act?'on':''}" onclick="tgF('${k}')">${act&&cu&&cu.a?aico(cu.a):''}${esc(act&&cu?cu.l:FN[k])} ▾</button>${ddk===k?`<div class="fm">${o.map((x,i)=>x.h?`<div class="fh">${esc(x.h)}</div>`:`<button class="${x.v===fl[k]?'on':''}" onclick="pickF('${k}',${i})">${x.a?aico(x.a):''}${esc(x.l)}</button>`).join('')}</div>`:''}</div>`}).join('')}
 function tgF(k){ddk=ddk===k?'':k;$('#fbar').innerHTML=fbar()}
 function pickF(k,i){fl[k]=fops[k]()[i].v;ddk='';$('#fbar').innerHTML=fbar();$('#txl').innerHTML=txList()}
 document.addEventListener('click',e=>{if(ddk&&!e.target.closest('.fd')){ddk='';let b=$('#fbar');if(b)b.innerHTML=fbar()}});
@@ -467,6 +482,7 @@ function tfR(){let f=TF,ty=f.type,tr=ty==='transfer',td=iso(new Date()),yd=iso(n
 op=(l,v)=>l.map(x=>`<option value="${esc(x[0])}" ${x[0]===v?'selected':''}>${esc(x[1])}</option>`).join(''),
 AC=db.accts.map(a=>[a.id,(a.icon||'🏦')+' '+a.name]),CD=db.cards.map(a=>[a.id,(a.icon||'💳')+' '+a.name]),
 src=v=>{let a=fa(v);return a?[aico(a),a.name]:['•','Nenhuma']},
+pickA=(k,lab,ic,nm,o)=>{let op=TF.pk===k;return`<div class="tf-row"><div class="tf-l">${lab}</div><button type="button" class="tf-v tf-pb" aria-expanded="${op}" onclick="TF.pk=TF.pk==='${k}'?'':'${k}';tfR()"><span class="tf-ic">${ic}</span><span class="tf-n">${esc(nm)}</span><span class="tf-ch">${op?'⌃':'›'}</span></button>${op?acList(TF[k],id=>`TF.${k}='${id}';TF.pk='';tfR()`,o):''}</div>`},
 pick=(k,lab,ic,nm,opts)=>`<div class="tf-row tf-pick"><div class="tf-l">${lab}</div><div class="tf-v"><span class="tf-ic">${ic}</span><span class="tf-n">${esc(nm)}</span><span class="tf-ch">›</span></div><select aria-label="${lab}" onchange="TF.${k}=this.value;tfR()">${opts}</select></div>`,
 ch=(on,l,js)=>`<button type="button" class="tf-chip ${on?'on':''}" onclick="${js}">${l}</button>`,
 other=f.date!==td&&f.date!==yd,h='';
@@ -474,8 +490,8 @@ h+=`<div class="tf-h ${TT[ty][1]}"><div class="tf-top"><button class="tf-x" oncl
 <div class="tf-tabs">${Object.keys(TT).map(k=>`<button class="${k===ty?'on':''}" onclick="tfT('${k}')">${TT[k][0]}</button>`).join('')}</div>
 <div class="tf-amt"><span class="tf-cur">R$</span><input id="tfa" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-label="Valor" value="${fBR(f.amount)}" oninput="TF.amount=pBR(this.value);tfPl()" onblur="this.value=fBR(TF.amount)"><button class="tf-pay ${f.paid?'on':''}" onclick="TF.paid=!TF.paid;tfR()" aria-pressed="${f.paid}">${THUMB}<span>${f.paid?TT[ty][2]:'Pendente'}</span></button></div></div>`;
 h+=`<label class="tf-row"><div class="tf-l">Descrição</div><div class="tf-v"><span class="tf-ic plain">✎</span><input class="tf-in" placeholder="${tr?'Transferência (opcional)':'Adicione a descrição'}" value="${esc(f.desc)}" oninput="TF.desc=this.value"></div></label>`;
-if(tr){let s=src(f.from),d=src(f.to);h+=pick('from','Sai de',s[0],s[1],op(AC,f.from))+pick('to','Vai para',d[0],d[1]+(db.cards.some(x=>x.id===f.to)?' · pagar fatura':''),`<optgroup label="Contas">${op(AC,f.to)}</optgroup>${CD.length?`<optgroup label="Pagar fatura do cartão">${op(CD,f.to)}</optgroup>`:''}`)}
-else{let l=db.cats.filter(x=>x.type===(ty==='income'?'income':'expense')),s=src(f.acct);h+=pick('cat','Categoria',esc(c.icon),c.name,op(l.map(x=>[x.id,x.icon+' '+x.name]),f.cat))+pick('acct',ty==='income'?'Recebido em':'Pago com',s[0],s[1],`<option value="">Nenhuma</option><optgroup label="Contas">${op(AC,f.acct)}</optgroup>${CD.length?`<optgroup label="Cartões">${op(CD,f.acct)}</optgroup>`:''}`)}
+if(tr){let s=src(f.from),d=src(f.to);h+=pickA('from','Sai de',s[0],s[1],{cards:false})+pickA('to','Vai para',d[0],d[1]+(db.cards.some(x=>x.id===f.to)?' · pagar fatura':''),{cardsLabel:'Pagar fatura do cartão'})}
+else{let l=db.cats.filter(x=>x.type===(ty==='income'?'income':'expense')),s=src(f.acct);h+=pick('cat','Categoria',esc(c.icon),c.name,op(l.map(x=>[x.id,x.icon+' '+x.name]),f.cat))+pickA('acct',ty==='income'?'Recebido em':'Pago com',s[0],s[1],{none:'Nenhuma'})}
 h+=`<div class="tf-row"><div class="tf-l">Data</div><div class="tf-v"><span class="tf-ic plain">📅</span><div class="tf-chips">${ch(f.date===td,'Hoje',`tfD('${td}')`)}${ch(f.date===yd,'Ontem',`tfD('${yd}')`)}<label class="tf-chip ${other?'on':''}">${other?br(f.date)+'/'+f.date.slice(0,4):'Outra data'}<input type="date" value="${f.date}" onclick="try{this.showPicker()}catch(e){}" onchange="if(this.value)tfD(this.value)"></label></div></div></div>`;
 if(!tr&&!f.id)h+=`<div class="tf-row"><div class="tf-l">Repetir lançamento</div><div class="tf-chips">${ch(f.rep==='fixed','Fixo',"tfRep('fixed')")}${ch(f.rep==='inst','Parcelado',"tfRep('inst')")}</div>${f.rep==='inst'?`<div class="tf-step"><button type="button" onclick="tfN(-1)" aria-label="Menos parcelas">−</button><b>${f.n}x</b><button type="button" onclick="tfN(1)" aria-label="Mais parcelas">＋</button><small id="tfpl"></small></div>`:f.rep==='fixed'?'<small class="tf-note">Repete todo mês, por 12 meses, a partir desta data.</small>':''}</div>`;
 if(f.id&&f.t.gid)h+=`<div class="tf-row"><small class="tf-note">Este lançamento faz parte de uma série (${isInst(f.t)?'parcelado':'fixo'}). As alterações valem só para ele.</small></div>`;
@@ -626,7 +642,8 @@ let vh=db.vehicles.find(x=>x.id===o.vid);if(vh&&o.odo>(+vh.km||0))vh.km=o.odo;
 if(id){Object.assign(f,o);let t=db.tx.find(x=>x.id===f.txId);if(t){if(t.paid)eff(t,-1);t.amount=f.total;t.date=f.date;t.desc=fuelDesc(f);if(t.paid)eff(t,1)}return}let r={id:nid(),...o};db.fuelLogs.push(r);db.curVeh=o.vid;setTimeout(()=>askFuel(r),0)},id&&(()=>{let t=db.tx.find(x=>x.id===f.txId);if(t&&confirm('Excluir também a despesa de combustível ligada a este abastecimento?')){if(t.paid)eff(t,-1);db.tx=db.tx.filter(x=>x!==t)}db.fuelLogs=db.fuelLogs.filter(x=>x.id!==id)}))}
 let AY=null;function ask(m,y,l,one,ex){AY=y;$('#sheet').className='sheet';$('#sheet').innerHTML=`<h2>${m[0]}</h2><p class="mu">${m[1]}</p>${ex||''}<div class="act">${one?'':'<button class="b2" onclick="closeF()">Agora não</button>'}<button class="b1" onclick="closeF();AY()">${l||'Lançar nos gastos'}</button></div>`;$('#modal').classList.add('open')}
 function fuelDesc(f){let v=db.vehicles.find(x=>x.id===f.vid);return'Combustível '+(f.fuel==='etanol'?'etanol':'gasolina')+(v?' · '+v.placa:'')}
-function askFuel(r){let op=[...db.accts.map(a=>[a.id,(a.icon||'🏦')+' '+a.name]),...db.cards.map(a=>[a.id,(a.icon||'💳')+' '+a.name])];ask(['Lançar também nos gastos?',`Abastecimento de ${money(r.total)} em ${br(r.date)}. Posso criar uma despesa de combustível já paga.`],()=>fuelTx(r,($('#fac')||{}).value),0,0,op.length?`<label>Pago com</label><select id="fac">${op.map(o=>`<option value="${o[0]}">${esc(o[1])}</option>`).join('')}</select>`:'')}
+let FACV='';const facR=()=>{let e=$('#facl');if(e)e.innerHTML=acList(FACV,id=>`FACV='${id}';facR()`)};
+function askFuel(r){FACV=((db.accts[0]||db.cards[0])||{}).id||'';ask(['Lançar também nos gastos?',`Abastecimento de ${money(r.total)} em ${br(r.date)}. Posso criar uma despesa de combustível já paga.`],()=>fuelTx(r,FACV),0,0,db.accts.length||db.cards.length?'<label>Pago com</label><div id="facl"></div>':'');facR()}
 function fuelTx(f,aid){let c=db.cats.find(x=>x.car&&x.name==='Combustível')||db.cats.find(x=>x.name==='Combustível');if(!c){c={id:nid(),name:'Combustível',icon:'⛽',type:'expense',car:true};db.cats.push(c)}let t={id:nid(),desc:fuelDesc(f),type:'expense',amount:f.total,cat:c.id,date:f.date,acct:aid||'',paid:true,tags:[]};db.tx.push(t);eff(t,1);f.txId=t.id;save()}
 function planMonth(){let p=pl(),ex=T.tx.filter(t=>t.type==='expense').sort((a,b)=>a.date.localeCompare(b.date)),hx=ex.filter(t=>!cat(t.cat).car&&!cat(t.cat).inv),cx=ex.filter(t=>cat(t.cat).car),ix=ex.filter(t=>cat(t.cat).inv),fa=p.target*p.fuelPlan/100,net=p.target-fa,inc=p.wife+p.other+net,pe=sum(hx,t=>t.amount);return{p,ex:hx,cx,ix,apl:sum(ix,t=>t.amount),car:sum(cx,t=>t.amount),fa,net,inc,pe,pp:sum(hx.filter(t=>t.paid),t=>t.amount),tot:p.wife+p.other+p.target,bal:inc-pe}}
 function PM(){let m=planMonth(),p=m.p,inp=(k,l,st)=>`<div><label>${l}</label><input type="number" inputmode="decimal" step="${st||'.01'}" value="${p[k]}" onchange="setPl('${k}',this.value)"></div>`;
@@ -808,7 +825,7 @@ let AF=null,AFT=0;
 function assetForm(id,type){let a=db.inv.find(x=>x.id===id),ty=a?(a.type||'outro'):type;if(!ty){assetPick();return}let t=AT[ty],v=a?{...a}:{type:ty,date:iso(new Date()),mode:'avg'};
 if(!a){if(ty==='rf'){v.sub='CDB';v.idx='cdi';v.rate=100}if(ty==='tesouro')v.td='selic';if(ty==='moeda')v.sym='USD'}if(v.tot===undefined&&v.applied)v.tot=v.applied;if(!v.mode)v.mode='avg';
 let lk=a&&a.txId?db.tx.find(x=>x.id===a.txId):null;v.pacct=a?(lk?lk.acct:''):((db.accts[0]||{}).id||'');v.out=!!(a&&a.out);
-AF={ty,id,coin:ty==='cripto'&&a&&a.sym?{id:a.sym,sym:a.tk,name:a.name}:null,sub:undefined,fk:'',tag:a?(a.tag||''):tagDef(ty),lk};
+AF={pacct:v.pacct,ty,id,coin:ty==='cripto'&&a&&a.sym?{id:a.sym,sym:a.tk,name:a.name}:null,sub:undefined,fk:'',tag:a?(a.tag||''):tagDef(ty),lk};
 let fs=[{n:'_hd',t:'html',w:1,l:'',h:`<div class="athd"><span>${t.i}</span><div><b>${t.n}</b><small>${t.d}</small></div>${a?'':'<button type="button" class="vt" onclick="assetPick()">Trocar</button>'}</div>`,get:()=>0}],live=['cripto','moeda'].includes(ty)||t.b3,NUM=(n,l,w)=>({n,l,t:'number',st:'any',w});
 if(ty==='cripto')fs.push({n:'_coin',l:'Moeda',t:'html',w:1,h:'<div id="afc"></div>',get:()=>0});
 if(t.b3)fs.push({n:'sym',l:'Código (ticker)',w:1,ph:{acao:'Ex.: PETR4',fii:'Ex.: MXRF11',etf:'Ex.: BOVA11',bdr:'Ex.: AAPL34'}[ty]});
@@ -828,11 +845,12 @@ if(ty==='tesouro'||ty==='rf')fs.push({n:'due',l:'Vencimento',t:'date'});
 fs.push({n:'inst',l:ty==='cripto'?'Corretora ou carteira':ty==='rf'?'Banco emissor':ty==='poup'?'Banco':'Corretora ou banco'});
 if(ty==='rf'){fs.push({n:'isento',l:'Isento de IR (LCI, LCA, CRI, CRA)',t:'check',w:1});fs.push({n:'liq',l:'Liquidez diária',t:'check',w:1})}
 fs.push({n:'_tag',l:'Tag',t:'html',w:1,h:'<div id="aft"></div>',get:()=>AF.tag});
-fs.push({...S('pacct','Pagar com a conta',[['','Não lançar (só registrar o ativo)'],...db.accts.map(x=>[x.id,(x.icon||'🏦')+' '+x.name])]),w:1});
+fs.push({n:'pacct',l:'Pagar com a conta',t:'html',w:1,h:'<div id="afp"></div>',get:()=>AF.pacct});
 fs.push({n:'_ph',l:'',t:'html',w:1,h:'<small id="afh" class="mu"></small>',get:()=>0});
 fs.push({n:'out',l:'Não somar no saldo total',t:'check',w:1});
 fs.push({n:'_pv',l:'',t:'html',w:1,h:'<div id="apv" class="apv"></div>',get:()=>0});
-form(a?'Editar ativo':'Novo ativo',fs,v,o=>assetSave(o,a),a&&(()=>assetDel(a)),afVis);if(ty==='cripto')afCoinR();afTagR();afVis()}
+form(a?'Editar ativo':'Novo ativo',fs,v,o=>assetSave(o,a),a&&(()=>assetDel(a)),afVis);if(ty==='cripto')afCoinR();afTagR();afAccR();afVis()}
+function afAccR(){let e=$('#afp');if(e)e.innerHTML=acList(AF.pacct,id=>`AF.pacct='${id}';afAccR();afVis()`,{none:'Não lançar (só registrar o ativo)',cards:false})}
 function afTagR(){let e=$('#aft');if(!e)return;e.innerHTML=`<div class="chips tgc">${TGS().map(t=>`<button type="button" class="${AF.tag===t.id?'on':''}" style="--tc:${t.c}" onclick="AF.tag=AF.tag==='${t.id}'?'':'${t.id}';afTagR()" aria-pressed="${AF.tag===t.id}"><i style="background:${t.c}"></i>${esc(t.n)}</button>`).join('')}<button type="button" class="nw" onclick="afTagNew()">＋ Nova tag</button></div>`}
 function afTagNew(){let n=(prompt('Nome da nova tag')||'').trim();if(!n)return;let L=TGS(),ex=L.find(t=>t.n.toLowerCase()===n.toLowerCase());if(ex){AF.tag=ex.id;afTagR();return}let t={id:'t'+nid(),n,c:TGP[L.length%TGP.length]};L.push(t);AF.tag=t.id;persist();afTagR()}
 function invCat(){let c=db.cats.find(x=>x.inv)||db.cats.find(x=>x.type==='expense'&&x.name==='Investimentos');if(!c){c={id:nid(),name:'Investimentos',icon:'📈',type:'expense'};db.cats.push(c)}c.inv=true;return c}
@@ -860,7 +878,7 @@ if(ty==='ext')h=R('Dólar agora',v.fx?money(v.fx):'—')+`<small>A cotação do 
 if(!t.live||v.price!=null){h+=R('Valor atual',money(v.value))+R('Investido',money(v.cost))+R('Rentabilidade',`${v.gain>=0?'+':''}${money(v.gain)}${v.pct!=null?' · '+nf(v.pct)+'%':''}`,v.gain<0?'rd':'gr');
 if(ty==='rf'||ty==='tesouro'){h+=R('IR estimado no resgate',v.ir?'−'+money(v.ir):'isento ou sem ganho','rd')+R('Líquido se resgatar hoje',money(v.net));h+=`<small>Calculado com ${esc(v.src)}${ty==='tesouro'?'. É o valor pela taxa contratada; o preço de venda no Tesouro pode variar (marcação a mercado)':''}.</small>`}
 if(ty==='poup')h+=`<small>Estimativa: ${esc(v.src)}, sem a TR. Corrija editando o valor aplicado se precisar.</small>`}
-pv.innerHTML=h;let fh=$('#afh');if(fh){let ac=o.pacct,lk=AF.lk&&db.tx.includes(AF.lk)?AF.lk:null;fh.innerHTML=!ac?(lk?'O lançamento ligado a este ativo será excluído e o valor volta para a conta.':'O ativo entra só na carteira. Nada muda nos seus lançamentos.'):(lk?`Já lançado em ${br(lk.date)}. Salvar atualiza o lançamento para ${money(v.cost)}.`:`Cria uma saída de ${money(v.cost)} em Lançamentos (categoria Investimentos) e desconta da conta. Não conta como despesa do mês.`)}}
+pv.innerHTML=h;let fh=$('#afh');if(fh){let ac=AF.pacct,lk=AF.lk&&db.tx.includes(AF.lk)?AF.lk:null;fh.innerHTML=!ac?(lk?'O lançamento ligado a este ativo será excluído e o valor volta para a conta.':'O ativo entra só na carteira. Nada muda nos seus lançamentos.'):(lk?`Já lançado em ${br(lk.date)}. Salvar atualiza o lançamento para ${money(v.cost)}.`:`Cria uma saída de ${money(v.cost)} em Lançamentos (categoria Investimentos) e desconta da conta. Não conta como despesa do mês.`)}}
 async function qOne(a){let k=qk(a);if(!k||!AF)return;AF.fk=k+'…';let s=k.slice(2);if(k[0]==='c')await qCoins([s]);else if(k[0]==='b')await qB3(s);else await qFx([s]);qSave();if(AF&&AF.fk===k+'…'){AF.fk=k;afVis()}}
 function assetSave(o,base){let n=afBuild(o,base),t=AT[n.type];
 if(n.type==='cripto'&&!n.sym){alert('Escolha a moeda.');return false}if((t.b3||n.type==='ext')&&!n.sym){alert('Informe o código do ativo.');return false}
