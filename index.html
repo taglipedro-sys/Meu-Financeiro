@@ -483,8 +483,8 @@ const pBR=s=>{s=String(s||'').replace(/[^\d,.]/g,'');if(s.includes(','))s=s.repl
 const fBR=n=>n?Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
 const THUMB='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 10h4v11H2zM8 21V10l5.2-7.1c.5-.7 1.6-.6 2 .2.2.4.2.8.1 1.2L14 9h6.2c1.2 0 2 1.1 1.8 2.2l-1.6 8C20.2 20.3 19.3 21 18.2 21z"/></svg>';
 function txForm(id,pre){let td=iso(new Date()),a0=(db.accts[0]||{}).id||'',a1=(db.accts[1]||{}).id||'',t=id?db.tx.find(x=>x.id===id):null,b=t?t:{type:'expense',date:sel,acct:a0,...pre},d=b.date||td;
-TF={id,t,type:b.type,amount:b.amount||0,desc:b.desc||'',cat:b.cat,acct:b.acct??a0,from:b.from||a0,to:b.to||a1,date:d,paid:b.paid??d<=td,rep:'once',n:2,tags:(b.tags||[]).join(', '),more:!!(b.tags||[]).length};
-tfCat();let sh=$('#sheet');sh.oninput=sh.onchange=null;sh.className='sheet txs';tfR();$('#modal').classList.add('open');$('#sheet').scrollTop=0;if(!id)setTimeout(()=>{let a=$('#tfa');if(a)a.focus()},60)}
+TF={cb:CBRET,id,t,type:b.type,amount:b.amount||0,desc:b.desc||'',cat:b.cat,acct:b.acct??a0,from:b.from||a0,to:b.to||a1,date:d,paid:b.paid??d<=td,rep:'once',n:2,tags:(b.tags||[]).join(', '),more:!!(b.tags||[]).length};
+CBRET=null;tfCat();let sh=$('#sheet');sh.oninput=sh.onchange=null;sh.className='sheet txs';tfR();$('#modal').classList.add('open');$('#sheet').scrollTop=0;if(!id)setTimeout(()=>{let a=$('#tfa');if(a)a.focus()},60)}
 function tfCat(){let l=db.cats.filter(c=>c.type===(TF.type==='income'?'income':'expense'));if(!l.some(c=>c.id===TF.cat))TF.cat=((TF.type==='expense'&&l.find(c=>c.name==='Outros'))||l[0]||{}).id||''}
 function tfR(){let f=TF,ty=f.type,tr=ty==='transfer',td=iso(new Date()),yd=iso(new Date(Date.now()-864e5)),c=cat(f.cat),
 op=(l,v)=>l.map(x=>`<option value="${esc(x[0])}" ${x[0]===v?'selected':''}>${esc(x[1])}</option>`).join(''),
@@ -494,7 +494,7 @@ pickA=(k,lab,ic,nm,o)=>{let op=TF.pk===k;return`<div class="tf-row"><div class="
 pick=(k,lab,ic,nm,opts)=>`<div class="tf-row tf-pick"><div class="tf-l">${lab}</div><div class="tf-v"><span class="tf-ic">${ic}</span><span class="tf-n">${esc(nm)}</span><span class="tf-ch">›</span></div><select aria-label="${lab}" onchange="TF.${k}=this.value;tfR()">${opts}</select></div>`,
 ch=(on,l,js)=>`<button type="button" class="tf-chip ${on?'on':''}" onclick="${js}">${l}</button>`,
 other=f.date!==td&&f.date!==yd,h='';
-h+=`<div class="tf-h ${TT[ty][1]}"><div class="tf-top"><button class="tf-x" onclick="closeF()" aria-label="Fechar">✕</button><span class="tf-tt">${f.id?'Editar lançamento':'Novo lançamento'}</span>${f.id?'<button class="tf-x" onclick="tfDel()" aria-label="Excluir">🗑</button>':'<span class="tf-x"></span>'}</div>
+h+=`<div class="tf-h ${TT[ty][1]}"><div class="tf-top"><button class="tf-x" onclick="tfClose()" aria-label="Fechar">✕</button><span class="tf-tt">${f.id?'Editar lançamento':'Novo lançamento'}</span>${f.id?'<button class="tf-x" onclick="tfDel()" aria-label="Excluir">🗑</button>':'<span class="tf-x"></span>'}</div>
 <div class="tf-tabs">${Object.keys(TT).map(k=>`<button class="${k===ty?'on':''}" onclick="tfT('${k}')">${TT[k][0]}</button>`).join('')}</div>
 <div class="tf-amt"><span class="tf-cur">R$</span><input id="tfa" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-label="Valor" value="${fBR(f.amount)}" oninput="TF.amount=pBR(this.value);tfPl()" onblur="this.value=fBR(TF.amount)"><button class="tf-pay ${f.paid?'on':''}" onclick="TF.paid=!TF.paid;tfR()" aria-pressed="${f.paid}">${THUMB}<span>${f.paid?TT[ty][2]:'Pendente'}</span></button></div></div>`;
 h+=`<label class="tf-row"><div class="tf-l">Descrição</div><div class="tf-v"><span class="tf-ic plain">✎</span><input class="tf-in" placeholder="${tr?'Transferência (opcional)':'Adicione a descrição'}" value="${esc(f.desc)}" oninput="TF.desc=this.value"></div></label>`;
@@ -512,8 +512,9 @@ function tfD(d){TF.date=d;if(!TF.id)TF.paid=d<=iso(new Date());tfR()}
 function tfRep(r){TF.rep=TF.rep===r?'once':r;tfR()}
 function tfN(v){TF.n=Math.max(2,Math.min(60,TF.n+v));tfR()}
 function tfPl(){let e=$('#tfpl');if(e)e.textContent=TF.amount?`de ${money(TF.amount/TF.n)} · total ${money(TF.amount)}`:'informe o valor total'}
-function tfSave(){let f=TF;if(txSave({type:f.type,desc:f.desc.trim(),amount:f.amount,cat:f.cat,date:f.date,acct:f.acct,from:f.from,to:f.to,paid:f.paid,tags:f.tags,repeat:f.rep,count:f.n},f.id,f.t)===false)return;closeF();save()}
-function tfDel(){let t=TF.t;if(!confirm('Excluir este lançamento?'))return;let l=[t];if(t.gid&&confirm('Excluir também as próximas parcelas ou repetições?'))l=db.tx.filter(x=>x.gid===t.gid&&x.date>=t.date);l.forEach(x=>x.paid&&eff(x,-1));db.tx=db.tx.filter(x=>!l.includes(x));closeF();save()}
+function tfSave(){let f=TF;if(txSave({type:f.type,desc:f.desc.trim(),amount:f.amount,cat:f.cat,date:f.date,acct:f.acct,from:f.from,to:f.to,paid:f.paid,tags:f.tags,repeat:f.rep,count:f.n},f.id,f.t)===false)return;closeF();save();cbBack(f.cb)}
+function tfClose(){let b=TF&&TF.cb;closeF();cbBack(b)}
+function tfDel(){let t=TF.t;if(!confirm('Excluir este lançamento?'))return;let l=[t];if(t.gid&&confirm('Excluir também as próximas parcelas ou repetições?'))l=db.tx.filter(x=>x.gid===t.gid&&x.date>=t.date);l.forEach(x=>x.paid&&eff(x,-1));db.tx=db.tx.filter(x=>!l.includes(x));closeF();save();cbBack(TF.cb)}
 function txSave(o,id,t){
 let tr=o.type==='transfer',tg=(o.tags||'').split(',').map(x=>x.trim()).filter(Boolean);if(!o.amount){alert('Informe o valor.');return false}if(!tr&&!o.desc){alert('Informe a descrição.');return false}
 if(tr&&(!o.from||!o.to||o.from===o.to)){alert('Escolha origem e destino diferentes para a transferência.');return false}
@@ -662,20 +663,23 @@ function billKey(c,d){let k=d.slice(0,7),C=+c.closing||0;if(C){let y=+k.slice(0,
 function cardBill(c,k){let cy=cardCyc(c,k),nx=cardCyc(c,ymAdd(k,1)),td=iso(new Date()),it=db.tx.filter(t=>t.acct===c.id&&t.type!=='transfer'&&t.date>=cy.s&&t.date<=cy.e).sort((a,b)=>b.date.localeCompare(a.date)||String(b.id).localeCompare(String(a.id))),
 tot=r2(sum(it,t=>t.type==='income'?-t.amount:t.amount)),pays=db.tx.filter(t=>t.type==='transfer'&&t.to===c.id&&t.date>cy.e&&t.date<=nx.e),pd=r2(sum(pays,t=>t.amount)),rest=r2(Math.max(0,tot-pd)),
 st=tot>0&&rest<=0?'pg':td<=cy.e?'ab':tot<=0?'zz':cy.due&&td>cy.due?'ve':'fe';return{...cy,it,tot,pays,pd,rest,st}}
-let CB=null;
+let CB=null,CBRET=null;
+function cbTx(id,pre){CBRET={...CB};txForm(id,pre)}
+function cbBack(b){if(!b||!db.cards.some(c=>c.id===b.id))return;CB=b;cbR();$('#modal').classList.add('open')}
 function cbOpen(id){let c=db.cards.find(x=>x.id===id);if(!c)return;CB={id,k:billKey(c,iso(new Date()))};$('#sheet').oninput=$('#sheet').onchange=null;cbR();$('#modal').classList.add('open');$('#sheet').scrollTop=0}
 function cbMv(n){CB.k=ymAdd(CB.k,n);cbR()}
 function cbR(){let c=db.cards.find(x=>x.id===CB.id);if(!c){closeF();return}let b=cardBill(c,CB.k),lm=b.due||b.e,nm=M[+lm.slice(5,7)-1].toLowerCase()+'/'+lm.slice(0,4),
-SL={ab:'Aberta',fe:'Fechada',ve:'Vencida',pg:'Paga',zz:'Sem gastos'},row=t=>{let i=t.type==='income';return`<div class="it"><div class="ic">${esc(cat(t.cat).icon)}</div><div class="mn" onclick="txForm('${t.id}')"><b>${esc(t.desc)}</b><small>${esc(cat(t.cat).name)} · ${br(t.date)}${i?' · estorno':''}</small></div><div class="am ${i?'gr':''}">${i?'− ':''}${money(t.amount)}</div></div>`},
-dt=b.due?`Fecha em ${br(b.e)} · vence em ${br(b.due)}`:`Compras de ${br(b.s)} a ${br(b.e)}`,a0=(db.accts[0]||{}).id||'';
+SL={ab:'Aberta',fe:'Fechada',ve:'Vencida',pg:'Paga',zz:'Sem gastos'},row=t=>{let i=t.type==='income';return`<div class="it"><div class="ic">${esc(cat(t.cat).icon)}</div><div class="mn" onclick="cbTx('${t.id}')"><b>${esc(t.desc)}</b><small>${esc(cat(t.cat).name)} · ${br(t.date)}${i?' · estorno':''}</small></div><div class="am ${i?'gr':''}">${i?'− ':''}${money(t.amount)}</div></div>`},
+td0=iso(new Date()),nd=td0<b.s?b.s:td0>b.e?b.e:td0,dt=b.due?`Fecha em ${br(b.e)} · vence em ${br(b.due)}`:`Compras de ${br(b.s)} a ${br(b.e)}`,a0=(db.accts[0]||{}).id||'';
 $('#sheet').className='sheet';$('#sheet').innerHTML=`<div class="cbh">${aico(c)}<h2>${esc(c.name)}</h2></div>
 <div class="cbn"><button type="button" onclick="cbMv(-1)" aria-label="Fatura anterior">‹</button><div><small>Fatura de</small><b>${nm}</b></div><button type="button" onclick="cbMv(1)" aria-label="Próxima fatura">›</button></div>
 <div class="cbt"><span class="cbs ${b.st}">${SL[b.st]}</span><span class="big">${money(b.tot)}</span><small>${dt}</small></div>
 <div class="cbg"><div><small>Pago</small><b class="${b.pd?'gr':''}">${money(b.pd)}</b></div><div><small>Falta pagar</small><b class="${b.rest&&b.st==='ve'?'rd':''}">${money(b.rest)}</b></div></div>
 ${+c.closing&&+c.due?'':`<small style="display:block;margin-top:10px">Sem os dias de fechamento e vencimento, cada fatura junta as compras de um mês do calendário. <a href="#" onclick="event.preventDefault();cardForm('${c.id}')">Cadastrar os dias</a></small>`}
+<button class="add" onclick="cbTx(null,{type:'expense',acct:'${c.id}',date:'${nd}'})">＋ Adicionar despesa</button>
 <div class="cbl"><h3>${b.it.length} ${b.it.length===1?'lançamento':'lançamentos'}</h3>${b.it.map(row).join('')||'<div class="empty">Nenhuma compra nesta fatura.</div>'}
-${b.pays.length?`<h3>Pagamentos</h3>${b.pays.map(t=>`<div class="it"><div class="ic">⇄</div><div class="mn" onclick="txForm('${t.id}')"><b>${esc(t.desc||'Pagamento de fatura')}</b><small>${t.from?esc(an(t.from))+' · ':''}${br(t.date)}</small></div><div class="am gr">${money(t.amount)}</div></div>`).join('')}`:''}</div>
-<div class="act"><button class="b2" onclick="closeF()">Fechar</button>${b.rest>0?`<button class="b1" onclick="txForm(null,{type:'transfer',from:'${a0}',to:'${c.id}',amount:${b.rest},desc:'Pagamento de fatura',date:'${b.due&&b.due>iso(new Date())?b.due:iso(new Date())}'})">Pagar ${money(b.rest)}</button>`:''}</div>`}
+${b.pays.length?`<h3>Pagamentos</h3>${b.pays.map(t=>`<div class="it"><div class="ic">⇄</div><div class="mn" onclick="cbTx('${t.id}')"><b>${esc(t.desc||'Pagamento de fatura')}</b><small>${t.from?esc(an(t.from))+' · ':''}${br(t.date)}</small></div><div class="am gr">${money(t.amount)}</div></div>`).join('')}`:''}</div>
+<div class="act"><button class="b2" onclick="closeF()">Fechar</button>${b.rest>0?`<button class="b1" onclick="cbTx(null,{type:'transfer',from:'${a0}',to:'${c.id}',amount:${b.rest},desc:'Pagamento de fatura',date:'${b.due&&b.due>iso(new Date())?b.due:iso(new Date())}'})">Pagar ${money(b.rest)}</button>`:''}</div>`}
 let FACV='';const facR=()=>{let e=$('#facl');if(e)e.innerHTML=acList(FACV,id=>`FACV='${id}';facR()`)};
 function askFuel(r){FACV=((db.accts[0]||db.cards[0])||{}).id||'';ask(['Lançar também nos gastos?',`Abastecimento de ${money(r.total)} em ${br(r.date)}. Posso criar uma despesa de combustível já paga.`],()=>fuelTx(r,FACV),0,0,db.accts.length||db.cards.length?'<label>Pago com</label><div id="facl"></div>':'');facR()}
 function fuelTx(f,aid){let c=db.cats.find(x=>x.car&&x.name==='Combustível')||db.cats.find(x=>x.name==='Combustível');if(!c){c={id:nid(),name:'Combustível',icon:'⛽',type:'expense',car:true};db.cats.push(c)}let t={id:nid(),desc:fuelDesc(f),type:'expense',amount:f.total,cat:c.id,date:f.date,acct:aid||'',paid:true,tags:[]};db.tx.push(t);eff(t,1);f.txId=t.id;save()}
