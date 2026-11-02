@@ -368,10 +368,35 @@ input:focus,select:focus,button:focus-visible{outline-color:var(--ac)}
 @keyframes ajin{from{transform:translateX(36px);opacity:.3}}@keyframes ajbk{from{transform:translateX(-24px);opacity:.3}}
 @media(min-width:1000px){#ajh{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:22px;align-items:start}#ajh>.aj-acc{grid-column:1/-1}.aj-s{max-width:520px}}
 @media(prefers-reduced-motion:reduce){*,::before,::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+/* Assistente de IA: bolinha menor do lado oposto ao ＋ e conversa em tela cheia no celular */
+.aib{position:fixed;left:max(16px,calc(50vw - 424px));bottom:calc(81px + env(safe-area-inset-bottom,0px));width:42px;height:42px;border:0;border-radius:50%;background:var(--card);color:var(--ac);z-index:7;box-shadow:var(--sh);display:grid;place-items:center;padding:0;transition:opacity .2s}
+.aib svg,.ai-av svg{width:22px;height:22px;fill:currentColor}
+@media(min-width:800px){.aib{left:auto;right:92px;bottom:33px}}
+.fab-on .aib{opacity:0;pointer-events:none}
+.sheet.ai{padding:0;max-width:560px;display:flex;flex-direction:column;height:min(720px,92vh)}.sheet.ai::before{display:none}
+@media(max-width:699px){.sheet.ai{height:100%;max-height:100%;border-radius:0}}
+.ai-h{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top,0px)) 8px 10px 14px;border-bottom:.5px solid var(--line);flex:none}
+@media(min-width:700px){.ai-h{padding-top:12px}}
+.ai-h>div{flex:1;min-width:0}.ai-h b{display:block;font-size:17px}.ai-h small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-av{width:34px;height:34px;border-radius:50%;background:var(--acs);color:var(--ac);display:grid;place-items:center;flex:none}
+.ai-hb{border:0;background:none;color:var(--ac);font-size:15px;padding:8px 6px}
+.ai-l{flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px}
+.ai-m{max-width:86%;padding:9px 13px;border-radius:18px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.4}
+.ai-m.u{align-self:flex-end;background:var(--ac);color:#fff;border-bottom-right-radius:6px}
+.ai-m.a{align-self:flex-start;background:var(--in);border-bottom-left-radius:6px}
+.ai-m.e{align-self:stretch;max-width:none;background:color-mix(in srgb,var(--r) 14%,var(--card));font-size:14px;white-space:normal}
+.ai-hi{margin:auto 0;text-align:center;color:var(--mu);padding:10px 6px}.ai-hi .ai-av{width:56px;height:56px;margin:0 auto 10px}.ai-hi .ai-av svg{width:30px;height:30px}.ai-hi b{display:block;color:var(--tx);font-size:18px;margin-bottom:4px}
+.ai-sg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}.ai-sg button{border:0;background:var(--in);border-radius:999px;padding:8px 13px;font-size:13.5px;color:var(--tx)}
+.ai-f{display:flex;gap:8px;align-items:flex-end;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));border-top:.5px solid var(--line);flex:none;margin:0}
+.ai-f textarea{flex:1;min-width:0;resize:none;background:var(--in);border:0;border-radius:20px;padding:9px 14px;font:inherit;font-size:16px;line-height:1.35;color:var(--tx);max-height:120px;outline:none}
+.ai-f button{width:40px;height:40px;border-radius:50%;border:0;background:var(--ac);color:#fff;font-size:19px;font-weight:600;flex:none}.ai-f button:disabled{opacity:.4}
+.ai-dots i{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--mu);animation:aid 1s infinite}.ai-dots i:nth-child(2){animation-delay:.15s}.ai-dots i:nth-child(3){animation-delay:.3s}@keyframes aid{50%{opacity:.25}}
+#aj-aip .opt button small{display:block;font-size:11px}
 </style></head><body>
 <div class="app"><div class="top"><h1>Meu Financeiro</h1><button id="syb" class="syb" hidden onclick="if(SU){sub.more='prof';go('more')}else authShow()"></button><div class="mb"><button onclick="mv(-1)" aria-label="Mês anterior">‹</button><button id="mn" class="mnb" onclick="mpOpen()" aria-label="Escolher mês e ano"></button><button onclick="mv(1)" aria-label="Próximo mês">›</button></div></div>
 <div id="syban" class="syban" role="status" aria-live="polite" hidden></div><main id="main"></main></div>
 <div class="fab-bg" onclick="fabT(false)"></div><div class="fab-menu" id="fabm"></div><button class="fab" onclick="fabT()" aria-label="Novo lançamento" aria-expanded="false">＋</button>
+<button class="aib" onclick="aiOpen()" aria-label="Perguntar ao assistente de IA" title="Assistente de IA"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2.5l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2zM18.5 14l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z"/></svg></button>
 <div class="nav"><div class="brand">Meu Financeiro</div><div id="nav"></div></div>
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
@@ -380,6 +405,8 @@ input:focus,select:focus,button:focus-visible{outline-color:var(--ac)}
 const DEF_ORDER=['ksal','kinc','kexp','kinv','cal','flow','rent','bud','ctas','uber'];
 const pad2=n=>String(n).padStart(2,'0');
 /* Cores de destaque (botões, abas, itens selecionados). A primeira é a padrão. */
+/* Provedores do assistente de IA (a ordem é a da tela de Ajustes) */
+const AIK=['poll','gem','groq','or','cus'];
 const ACC=[['#0a84ff','Azul'],['#30d158','Verde'],['#5e5ce6','Índigo'],['#bf5af2','Roxo'],['#ff375f','Rosa'],['#ff9f0a','Laranja'],['#64d2ff','Ciano'],['#8e8e93','Grafite']];
 function fix(s){if(!s.cats)s.cats=[];['tx','days','vehicles','fuelLogs','accts','cards','budgets','inv'].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});['work','plans','snaps'].forEach(k=>{if(!s[k]||typeof s[k]!=='object')s[k]={}});
 if(s.fuelPlan===undefined)s.fuelPlan=19;if(s.goal===undefined)s.goal=10000;if(s.curVeh===undefined)s.curVeh=s.vehicles[0]?s.vehicles[0].id:null;
@@ -406,6 +433,7 @@ num(s.tx,['amount']);num(s.accts,['balance']);num(s.cards,['limit','used','closi
 s.tx.forEach(t=>{if(!okD(t.date))t.date=td;if(!Array.isArray(t.tags))t.tags=[];t.tags=t.tags.map(String)});s.days.forEach(d=>{if(!okD(d.date))d.date=td});s.fuelLogs.forEach(f=>{if(!okD(f.date))f.date=td});s.inv.forEach(i=>{['date','due','curAt'].forEach(k=>{if(i[k]&&!okD(i[k]))delete i[k]})});
 ['accts','cards'].forEach(k=>s[k].forEach(a=>{['color','bg'].forEach(c=>{if(a[c]&&!okC(a[c]))delete a[c]});if(a.logo&&!/^data:image\/(png|jpe?g|gif|webp);base64,[\w+/=]+$/.test(a.logo))delete a.logo}));
 s.prefs.invTags.forEach(t=>{if(!okC(t.c))t.c='#9ca3af';t.n=String(t.n??'Tag')});if(!okC(s.profile.color))s.profile.color='#2563eb';
+{let A=s.prefs.ai,o=x=>{let r={};if(x&&typeof x==='object'&&!Array.isArray(x))AIK.forEach(k=>{if(typeof x[k]==='string')r[k]=x[k].trim().slice(0,500)});return r};if(!A||typeof A!=='object'||Array.isArray(A))A={};s.prefs.ai={p:AIK.includes(A.p)?A.p:'poll',k:o(A.k),m:o(A.m),u:typeof A.u==='string'?A.u.trim().slice(0,500):''}}
 const AK='cripto acao fii etf bdr tesouro rf poup moeda ext fundo prev outro'.split(' ');s.inv.forEach(i=>{if(i.type&&!AK.includes(i.type))i.type='outro'})}
 function tagDef(t){return{acao:'acoes',etf:'acoes',bdr:'acoes',ext:'acoes',fii:'fii',cripto:'cripto',tesouro:'rf',rf:'rf',poup:'rf'}[t]||''}
 function migr11(s){let wc=new Set(s.cats.filter(c=>c.car).map(c=>c.id)),cn=n=>s.cats.find(c=>c.name===n&&c.type==='expense'),mk=(n,ic)=>{let c=cn(n);if(!c){c={id:nid(),name:n,icon:ic,type:'expense'};s.cats.push(c)}return c},acc=(s.accts[0]||{}).id||'';
@@ -556,6 +584,7 @@ look:()=>`<div class="card" id="aj-tema"><h2>Tema</h2><div class="opt" style="ma
 inv:()=>`<div class="card"><h2>Investimentos e cotações</h2><label class="tgl" id="aj-auto"><span>Atualizar cotações sozinho (a cada minuto)</span><input type="checkbox" ${IC().auto?'checked':''} onchange="IC().auto=this.checked;persist()"><i></i></label>
 <label id="aj-tok" style="margin-top:8px">Token da brapi (ações, FIIs, ETFs e BDRs)</label><input value="${esc(IC().token)}" placeholder="Cole aqui o seu token" onchange="IC().token=this.value.trim();QC=Object.fromEntries(Object.entries(QC).filter(e=>e[0][0]!=='b'));save();qRefresh(1)" autocomplete="off"><small style="display:block;margin-top:6px">Sem token, só PETR4, VALE3, ITUB4 e MGLU3 têm cotação. Crie um token gratuito em brapi.dev (o plano grátis consulta 1 ativo por vez, por isso ações atualizam a cada 10 minutos).</small>
 <div class="g" id="aj-cdi" style="margin-top:12px"><div><label>CDI de reserva (% a.a.)</label><input type="number" step=".01" inputmode="decimal" value="${IC().cdi}" onchange="IC().cdi=+this.value||0;save()"></div><div><label>IPCA de reserva (% a.a.)</label><input type="number" step=".01" inputmode="decimal" value="${IC().ipca}" onchange="IC().ipca=+this.value||0;save()"></div></div><small style="display:block;margin-top:6px">Usados só se o Banco Central não responder. Normalmente a renda fixa e o Tesouro são calculados com o CDI, a Selic e o IPCA oficiais de cada dia.</small></div>`,
+ai:()=>aiCfg(),
 cats:()=>`<div class="card">${db.cats.map(c=>`<div class="row"><div class="mn" onclick="catForm('${c.id}')"><b>${esc(c.icon)} ${esc(c.name)}</b><small>${c.type==='income'?'Receita':'Despesa'}${c.car?' · combustível':''}${c.drv?' · repasse dos apps':''}</small></div></div>`).join('')}<button class="add" onclick="catForm()">＋ Categoria</button></div>`,
 bk:()=>{let prev=false;try{prev=!!localStorage.getItem('mf_prev')}catch(e){}let range=[...db.tx.map(t=>t.date),...db.days.map(d=>d.date)].sort();
 return`<div class="card" id="aj-dados"><h2>Seus dados</h2><table class="sumt">${[['Lançamentos',db.tx.length],['Dias de motorista',db.days.length],['Abastecimentos',db.fuelLogs.length],['Veículos',db.vehicles.length],['Contas e cartões',db.accts.length+db.cards.length],['Investimentos',db.inv.length],['Período',range.length?br(range[0])+'/'+range[0].slice(0,4)+' a '+br(range[range.length-1])+'/'+range[range.length-1].slice(0,4):'—']].map(r=>`<tr><td class="mu">${r[0]}</td><td style="text-align:right"><b>${r[1]}</b></td></tr>`).join('')}</table><small>${SU?'Tudo fica salvo neste aparelho e na sua conta na nuvem.':'Tudo fica salvo só neste navegador. Entre na sua conta para guardar na nuvem.'} Exportar um backup de vez em quando continua sendo uma boa ideia.</small></div>
@@ -568,8 +597,8 @@ about:()=>`<div class="card"><h2>Meu Financeiro</h2><small>App pessoal de finan�
 <div class="card"><h2>Como os dados são guardados</h2><small>Tudo é gravado primeiro neste aparelho, então o app abre e funciona sem internet e sem conta. Se você entrar na sua conta, as alterações também vão para a nuvem; o que for feito sem internet fica guardado e é enviado quando a conexão voltar.</small></div>`};
 /* Ajustes: página inicial curta, em grupos, e cada item abre uma subpágina (no modelo dos Ajustes do iPhone).
    Itens que não se aplicam ficam de fora em vez de aparecer desligados. */
-const AJT={prof:'Conta e perfil',drv:'Motorista e planejamento',look:'Aparência e Início',inv:'Investimentos e cotações',cats:'Categorias',bk:'Dados e backup',about:'Sobre'};
-const AJI={tag:'<path d="M3.5 12.5v-8a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.3"/>',card:'<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/>',lim:'<path d="M4.6 17.5a8 8 0 1 1 14.8 0"/><path d="M12 13.5l4-4.5"/>',car:'<path d="M3.5 17v-3.5l2-5.5h13l2 5.5V17zM6 17v2.5M18 17v2.5M3.5 13.5h17"/>',inv:'<path d="M4 19.5h16M5 15l4.5-4.5 3.5 3.5L19.5 7.5"/><path d="M15 7.5h4.5V12"/>',look:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="#fff"/>',data:'<ellipse cx="12" cy="6.2" rx="7.5" ry="2.7"/><path d="M4.5 6.2v11.6c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7V6.2M4.5 12c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7"/>',info:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/>'};
+const AJT={ai:'Assistente de IA',prof:'Conta e perfil',drv:'Motorista e planejamento',look:'Aparência e Início',inv:'Investimentos e cotações',cats:'Categorias',bk:'Dados e backup',about:'Sobre'};
+const AJI={tag:'<path d="M3.5 12.5v-8a1 1 0 0 1 1-1h8l8 8-9 9z"/><circle cx="8" cy="8" r="1.3"/>',card:'<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/>',lim:'<path d="M4.6 17.5a8 8 0 1 1 14.8 0"/><path d="M12 13.5l4-4.5"/>',car:'<path d="M3.5 17v-3.5l2-5.5h13l2 5.5V17zM6 17v2.5M18 17v2.5M3.5 13.5h17"/>',inv:'<path d="M4 19.5h16M5 15l4.5-4.5 3.5 3.5L19.5 7.5"/><path d="M15 7.5h4.5V12"/>',look:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="#fff"/>',data:'<ellipse cx="12" cy="6.2" rx="7.5" ry="2.7"/><path d="M4.5 6.2v11.6c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7V6.2M4.5 12c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7"/>',info:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.7v.1"/>',ai:'<path d="M10 3.5l2 5.5 5.5 2-5.5 2-2 5.5-2-5.5-5.5-2 5.5-2zM18 15l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>'};
 const ajIc=(k,c)=>`<span class="sq" style="background:${c}"><svg viewBox="0 0 24 24" aria-hidden="true">${AJI[k]}</svg></span>`,plu=(n,a,b)=>n+' '+(n===1?a:b);
 const ajExp=()=>/jwt|expired|refresh token|not authenticated|401/i.test(SY.err||'');
 /* Situação da sincronização em uma linha: [texto, classe]. lo = neutro, ok = em dia, wa = atenção, er = problema. */
@@ -578,7 +607,7 @@ const ajStH=()=>{let s=ajStat();return`<small id="ajst" class="aj-st ${s[1]}"><i
 function AJG(){let th={auto:'Automático',dark:'Escuro',light:'Claro'}[db.prefs.theme||'auto'],on=HOMEC.length-HOMEC.filter(c=>db.prefs.hide.includes(c[0])).length;
 return[['Organização',[{k:'cats',t:'Categorias',i:'tag',c:'#ff9f0a',v:plu(db.cats.length,'categoria','categorias')},{t:'Contas e cartões',i:'card',c:'#0a84ff',v:plu(db.accts.length,'conta','contas')+' · '+plu(db.cards.length,'cartão','cartões'),go:"sub.moves='acc';go('moves')"},{t:'Limites de gastos',i:'lim',c:'#ff453a',v:db.budgets.length?plu(db.budgets.length,'limite','limites'):'Nenhum',go:"sub.plan='lim';go('plan')"}]],
 ['Trabalho e patrimônio',[{k:'drv',t:'Motorista e planejamento',i:'car',c:'#30b04f',v:'Meta '+money(db.goal).replace(/,00$/,'')},{k:'inv',t:'Investimentos e cotações',i:'inv',c:'#32ade6',v:IC().auto?'Atualiza sozinho':'Manual'}]],
-['Personalização',[{k:'look',t:'Aparência e Início',i:'look',c:'#bf5af2',v:th+' · '+plu(on,'card','cards')}]],
+['Personalização',[{k:'look',t:'Aparência e Início',i:'look',c:'#bf5af2',v:th+' · '+plu(on,'card','cards')},{k:'ai',t:'Assistente de IA',i:'ai',c:'#ff2d55',v:aiStat()}]],
 ['Dados',[{k:'bk',t:'Dados e backup',i:'data',c:'#5e5ce6',v:SU?'Neste aparelho e na nuvem':'Só neste aparelho'},{k:'about',t:'Sobre',i:'info',c:'#8e8e93',v:''}]]]}
 const ajRow=x=>`<button class="lr" onclick="${x.go||`ajGo('${x.k}')`}">${ajIc(x.i,x.c)}<span class="lb"><span class="lt">${x.t}</span>${x.v?`<span class="lv">${esc(x.v)}</span>`:''}<span class="ch" aria-hidden="true">›</span></span></button>`;
 /* Tudo o que a busca encontra: nome da opção, subpágina (k) e o elemento que pisca (a). kw ajuda a achar por outras palavras. */
@@ -586,6 +615,7 @@ function AJX(){return[{t:'Seu nome',k:'prof',a:'aj-nome',kw:'perfil usuario'},{t
 {t:'Meta mensal padrão',k:'drv',a:'aj-meta',kw:'uber 99 objetivo mes novo'},{t:'% de combustível padrão',k:'drv',a:'aj-comb',kw:'gasolina etanol percentual'},{t:'Veículos e abastecimentos',k:'drv',a:'aj-veic',kw:'carro placa km'},
 {t:'Tema',k:'look',a:'aj-tema',kw:'escuro claro automatico modo noturno'},{t:'Cor de destaque',k:'look',a:'aj-ac',kw:ACC.map(c=>c[1]).join(' ')},{t:'Cards da tela inicial',k:'look',a:'aj-cards',kw:'inicio painel '+HOMEC.map(c=>c[1]).join(' ')},
 {t:'Atualizar cotações sozinho',k:'inv',a:'aj-auto',kw:'automatico minuto'},{t:'Token da brapi',k:'inv',a:'aj-tok',kw:'acoes fii etf bdr'},{t:'CDI e IPCA de reserva',k:'inv',a:'aj-cdi',kw:'selic juros renda fixa tesouro'},
+{t:'Assistente de IA',k:'ai',a:'aj-aip',kw:'inteligencia artificial chat perguntas gemini groq openrouter pollinations chatgpt openai'},{t:'Chave de API da IA',k:'ai',a:'aj-aik',kw:'token key modelo inteligencia artificial'},
 {t:'Categorias',k:'cats',a:'',kw:db.cats.map(c=>c.name).join(' ')},{t:'Seus dados',k:'bk',a:'aj-dados',kw:'resumo quantidade periodo'},{t:'Baixar ou copiar backup',k:'bk',a:'aj-exp',kw:'exportar json arquivo salvar'},{t:'Importar um backup',k:'bk',a:'aj-imp',kw:'adicionar juntar substituir restaurar arquivo'},{t:'Começar do zero',k:'bk',a:'aj-zero',kw:'apagar tudo limpar resetar'},
 {t:'Contas e cartões',s:'Lançar',go:"sub.moves='acc';go('moves')",kw:'banco saldo credito '+db.accts.concat(db.cards).map(a=>a.name).join(' ')},{t:'Limites de gastos',s:'Planejamento',go:"sub.plan='lim';go('plan')",kw:'orcamento teto'},{t:'Sobre o app',k:'about',a:'',kw:'versao dados'}]}
 const nrm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
@@ -602,7 +632,7 @@ function ajSub(k){return`<div class="aj-nav wide"><button class="aj-bk" onclick=
 /* Abre uma subpágina (k vazio volta para o início dos Ajustes). Com a, rola até a opção e faz ela piscar. */
 function ajGo(k,a){let back=!k&&page==='more'&&sub.more;sub.more=k||'';page='more';if(!k)AJQ='';scrollTo(0,0);render();let m=$('#main');if(k||back)m.classList.add(k?'aj-in':'aj-back');
 if(a){let e=document.getElementById(a);if(e){e.scrollIntoView({block:'center'});e.classList.add('aj-fl');setTimeout(()=>e.classList.remove('aj-fl'),1600)}}}
-const bkJSON=()=>JSON.stringify({app:'meu-financeiro',version:10,exportedAt:new Date().toISOString(),db},null,1),bkName=()=>`meu-financeiro-backup-${iso(new Date())}.json`;
+const bkJSON=()=>JSON.stringify({app:'meu-financeiro',version:10,exportedAt:new Date().toISOString(),db},(k,v)=>k==='ai'&&v&&v.k?{...v,k:{}}:v,1),bkName=()=>`meu-financeiro-backup-${iso(new Date())}.json`;
 async function bkExport(){let txt=bkJSON(),f=null;try{f=new File([txt],bkName(),{type:'application/json'})}catch(e){}
 if(f&&navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){try{await navigator.share({files:[f],title:'Backup Meu Financeiro'});return}catch(e){if(e.name==='AbortError')return}}
 try{let u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=u;a.download=bkName();document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}catch(e){bkCopy()}}
@@ -1188,6 +1218,106 @@ window.addEventListener('online',()=>{syncUI();if(SU)syncCheck()});window.addEve
 function applyTheme(){let t=(db.prefs||{}).theme||'auto';document.documentElement.style.setProperty('--ac',(db.prefs||{}).accent||ACC[0][0]);if(t==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=t}
 function replaceDb(n,msg){try{localStorage.setItem('mf_prev',JSON.stringify(db))}catch(e){}let sk=n._skip||0;delete n._skip;db=n;let d=new Date();cur=new Date(d.getFullYear(),d.getMonth(),1);sel=iso(d);HY=null;save();applyTheme();
 ask(['Pronto!',(msg||'Os dados foram substituídos.')+(sk?` ${sk} despesa(s) com valor zero foram ignoradas.`:'')+' A versão anterior ficou guardada: dá para desfazer em Ajustes → Dados e backup.'],()=>{},'OK',1)}
+/* Assistente de IA. O usuário escolhe o serviço em Ajustes → Assistente de IA e cola a própria chave (o Pollinations funciona
+   sem chave). A cada pergunta vai junto um resumo dos dados: totais já calculados pelo app (a IA não precisa somar de cabeça)
+   e os lançamentos dos meses que importam para a pergunta. A IA só lê; não cria nem altera nada. */
+const AIP={
+poll:{n:'Pollinations',s:'Sem cadastro',d:'Funciona sem chave e sem cadastro. É grátis, mas pode ficar lento ou recusar perguntas em horários de pico. Para ter mais limite, crie uma chave grátis no site deles e cole abaixo.',m:'openai',opt:1,link:'https://enter.pollinations.ai'},
+gem:{n:'Google Gemini',s:'Chave grátis',d:'Entre com sua conta Google no AI Studio, toque em “Create API key” e cole a chave abaixo. O plano grátis basta para uso pessoal.',m:'gemini-flash-latest',link:'https://aistudio.google.com/apikey'},
+groq:{n:'Groq',s:'Chave grátis',d:'Crie uma conta grátis no Groq, gere uma chave em “API Keys” e cole abaixo. Responde muito rápido.',m:'llama-3.3-70b-versatile',u:'https://api.groq.com/openai/v1/chat/completions',link:'https://console.groq.com/keys'},
+or:{n:'OpenRouter',s:'Modelos grátis',d:'Crie uma conta grátis no OpenRouter e gere uma chave. O modelo padrão, “openrouter/free”, escolhe sozinho um modelo gratuito.',m:'openrouter/free',u:'https://openrouter.ai/api/v1/chat/completions',link:'https://openrouter.ai/keys'},
+cus:{n:'Outra IA',s:'Compatível com OpenAI',d:'Qualquer serviço compatível com a API da OpenAI (ChatGPT, DeepSeek, Mistral, Ollama…). Informe o endereço, a chave e o modelo.',m:''}};
+const AIC=()=>{let a=db.prefs.ai;if(!a||typeof a!=='object')a=db.prefs.ai={p:'poll',k:{},m:{},u:''};if(!AIP[a.p])a.p='poll';if(!a.k)a.k={};if(!a.m)a.m={};return a};
+const aiNeedKey=()=>{let a=AIC();return !AIP[a.p].opt&&!(a.k[a.p]||'').trim()};
+const aiStat=()=>AIP[AIC().p].n+(aiNeedKey()?' · falta a chave':'');
+const AISVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2.5l2.2 6 6 2.2-6 2.2-2.2 6-2.2-6-6-2.2 6-2.2zM18.5 14l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z"/></svg>';
+const AISYS=`Você é o assistente financeiro do app "Meu Financeiro", um app pessoal de finanças da casa e do trabalho como motorista de aplicativo.
+Regras:
+- Responda sempre em português do Brasil, curto e direto, como numa conversa de celular.
+- Use só os dados abaixo. Se a informação não estiver neles, diga isso com franqueza e, se der, diga onde ver no app.
+- Valores em reais no formato R$ 1.234,56. Diga o período considerado (ex.: "hoje, 02/11" ou "em novembro").
+- Quando um total já vier calculado nos dados, use esse total em vez de somar de cabeça. Se precisar somar, confira a conta.
+- Não invente lançamentos nem valores.
+- Pode usar listas curtas com "-" e destacar números com **negrito**. Não use tabelas.
+- Você só lê os dados: não consegue criar, editar ou apagar lançamentos. Se pedirem, explique como fazer no app (botão ＋).`;
+function aiCtx(qs){const td=iso(new Date()),tm=td.slice(0,7),f=money,L=[],DW=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+const mL=k=>M[+k.slice(5,7)-1].toLowerCase()+' de '+k.slice(0,4),nm=n=>{let a=fa(n);return a?a.name:n||''};
+const isE=t=>t.type==='expense'&&!cat(t.cat).inv,isI=t=>t.type==='income'&&!cat(t.cat).drv,amt=(a,p)=>r2(sum(a.filter(p),t=>t.amount));
+const tl=t=>{let tr=t.type==='transfer',c=cat(t.cat);return[brD(t.date),tr?'transferência':t.type==='income'?'receita':'despesa',String(t.desc||'').slice(0,60),f(t.amount),tr?nm(t.from)+' → '+nm(t.to):c.name+(c.inv?' (aplicação em investimento, não conta como gasto)':'')+(c.drv?' (repasse dos apps, já contado no faturamento do motorista)':''),tr?'':nm(t.acct),t.paid?(tr?'efetivada':t.type==='income'?'recebida':'paga'):'pendente',(t.tags||[]).map(x=>'#'+x).join(' ')].filter(Boolean).join(' | ')};
+/* meses detalhados: atual, anterior, o aberto na tela e os citados na conversa */
+let S=new Set([tm,ymAdd(tm,-1),ym()]),qn=nrm(qs),yrs=(qn.match(/\b20\d\d\b/g)||[]).map(Number);
+M.forEach((m,i)=>{if(new RegExp('\\b'+nrm(m)+'\\b').test(qn)){let ys=yrs.length?yrs:[+tm.slice(0,4)];if(!yrs.length&&i+1>+tm.slice(5))ys.push(+tm.slice(0,4)-1);ys.forEach(y=>S.add(y+'-'+pad2(i+1)))}});
+(qn.match(/\b\d{1,2}\/\d{1,2}(\/\d{2,4})?\b/g)||[]).forEach(d=>{let p=d.split('/'),mo=+p[1],y=p[2]?(p[2].length===2?2000+ +p[2]:+p[2]):+tm.slice(0,4);if(mo>=1&&mo<=12)S.add(y+'-'+pad2(mo))});
+if(/\bano passado\b/.test(qn)){let y=+tm.slice(0,4)-1;for(let i=1;i<=12;i++)S.add(y+'-'+pad2(i))}
+let SM=[...S].sort().reverse().slice(0,6);
+L.push(`Hoje é ${DW[new Date().getDay()]}, ${brD(td)}. Mês aberto na tela do app: ${mL(ym())}.`);
+L.push('Como o app conta: gasto/despesa = lançamentos do tipo despesa, sem as aplicações em investimento. Transferências entre contas e pagamentos de fatura não são gastos. Compra no cartão conta como gasto na data da compra. Pendente = ainda não pago/recebido. Receitas do mês = receitas lançadas + faturamento do motorista (os repasses dos apps não entram de novo).');
+let tt=db.tx.filter(t=>t.date===td),dd=db.days.filter(d=>d.date===td),gd=sum(dd,d=>d.uber+d.n99+d.part);
+L.push(`\n## Hoje (${brD(td)})\nDespesas: ${f(amt(tt,isE))} (pagas ${f(amt(tt,t=>isE(t)&&t.paid))}, pendentes ${f(amt(tt,t=>isE(t)&&!t.paid))}) · Receitas: ${f(amt(tt,isI)+gd)}${gd?` (inclui ${f(gd)} do motorista)`:''} · ${tt.length} lançamento(s) hoje.`);
+let w0=new Date();w0.setDate(w0.getDate()-6);let w=iso(w0),wt=db.tx.filter(t=>t.date>=w&&t.date<=td);
+L.push(`Últimos 7 dias (${brD(w)} a ${brD(td)}): despesas ${f(amt(wt,isE))}, receitas ${f(amt(wt,isI)+sum(db.days.filter(d=>d.date>=w&&d.date<=td),d=>d.uber+d.n99+d.part))}.`);
+L.push('\n## Totais por mês');
+for(let i=-12;i<=3;i++){let k=ymAdd(tm,i),x=totals(k);if(!x.tx.length&&!x.n&&k!==tm)continue;L.push(`${mL(k)}${k===tm?' (mês atual)':''}: receitas ${f(x.inc)} | despesas ${f(x.exp)} (a pagar ${f(x.pend)}) | saldo do mês ${f(x.inc-x.exp)}${x.apl?` | aplicado em investimentos ${f(x.apl)}`:''}${x.gross?` | faturamento motorista ${f(x.gross)} em ${x.n} dia(s)`:''}`)}
+SM.forEach(k=>{let x=totals(k);if(!x.tx.length&&!x.n)return;let by=(ty,p)=>{let g={};x.tx.filter(p).forEach(t=>{let n=cat(t.cat).name;g[n]=g[n]||[0,0];g[n][0]+=t.amount;g[n][1]++});return Object.entries(g).sort((a,b)=>b[1][0]-a[1][0]).map(e=>`- ${e[0]}: ${f(e[1][0])} (${e[1][1]} lanç.)`).join('\n')};
+let dy={};x.tx.forEach(t=>{if(t.type==='transfer')return;let d=dy[t.date]=dy[t.date]||[0,0];if(isE(t))d[0]+=t.amount;else if(isI(t))d[1]+=t.amount});x.days.forEach(d=>{let e=dy[d.date]=dy[d.date]||[0,0];e[1]+=d.uber+d.n99+d.part});
+L.push(`\n## ${mL(k)}: despesas por categoria\n${by('e',isE)||'(nenhuma)'}\nReceitas por categoria:\n${by('i',isI)||'(nenhuma)'}${x.gross?`\n- Motorista (Uber, 99 e particular): ${f(x.gross)}`:''}\nPor dia (despesas / receitas):\n${Object.keys(dy).sort().map(d=>`${brD(d)}: ${f(dy[d][0])} / ${f(dy[d][1])}`).join('\n')}`)});
+L.push('\n## Contas');db.accts.forEach(a=>L.push(`- ${a.name}: saldo ${f(a.balance)}`));L.push(`Saldo total das contas: ${f(sum(db.accts,a=>a.balance))}`);
+if(db.cards.length){L.push('\n## Cartões de crédito');db.cards.forEach(c=>{let k=billKey(c,td),b=cardBill(c,k),n=cardBill(c,ymAdd(k,1));L.push(`- ${c.name}: limite ${f(c.limit)}, fecha dia ${c.closing}, vence dia ${c.due}. Fatura atual (${mL(k)}, ${b.s?brD(b.s)+' a '+brD(b.e):''}${b.due?', vence '+brD(b.due):''}): ${f(b.tot)}, falta pagar ${f(b.rest)}. Próxima fatura até agora: ${f(n.tot)}.`)})}
+if(db.budgets.length){L.push(`\n## Limites de gastos (${mL(tm)})`);db.budgets.forEach(b=>{let s=amt(db.tx.filter(t=>t.date.startsWith(tm)),t=>t.type==='expense'&&t.cat===b.cat);L.push(`- ${cat(b.cat).name}: gasto ${f(s)} de ${f(b.limit)}${s>b.limit?' (estourou)':''}`)})}
+let dr=db.days.filter(d=>SM.some(k=>d.date.startsWith(k)));if(dr.length||db.days.length){let p=db.plans[tm];L.push(`\n## Motorista\nMeta de faturamento de ${mL(tm)}: ${f(p&&p.target!=null?p.target:db.goal)}.`);dr.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,62).forEach(d=>L.push(`${brD(d.date)}: Uber ${f(d.uber)}, 99 ${f(d.n99)}, particular ${f(d.part)}${d.trips?`, ${d.trips} corridas`:''}${d.hours?`, ${d.hours} h`:''}${d.km?`, ${d.km} km`:''}${d.fuel?`, combustível ${f(d.fuel)}`:''}`))}
+let iv=inIn();if(iv.length){L.push(`\n## Investimentos\nTotal: ${f(sum(iv,i=>i.amount))} (aplicado ${f(sum(iv,i=>i.applied??i.amount))})`);iv.slice(0,30).forEach(i=>L.push(`- ${i.name||(AT[i.type]||{}).n||'Ativo'}: ${f(i.amount)}`))}
+let fut=iso(new Date(Date.now()+30*864e5)),up=db.tx.filter(t=>!t.paid&&t.type!=='transfer'&&t.date>td&&t.date<=fut&&!SM.some(k=>t.date.startsWith(k)));
+let det=db.tx.filter(t=>SM.some(k=>t.date.startsWith(k))).sort((a,b)=>b.date.localeCompare(a.date)),cap=320;
+L.push(`\n## Lançamentos de ${SM.map(mL).join(', ')}${det.length>cap?` (os ${cap} mais recentes de ${det.length})`:''}\nData | tipo | descrição | valor | categoria | conta/cartão | situação | tags`);det.slice(0,cap).forEach(t=>L.push(tl(t)));
+if(up.length){L.push('\n## Pendentes dos próximos 30 dias (fora dos meses acima)');up.sort((a,b)=>a.date.localeCompare(b.date)).slice(0,60).forEach(t=>L.push(tl(t)))}
+return L.join('\n')}
+async function aiJ(r){let t=await r.text(),j=null;try{j=JSON.parse(t)}catch(e){}
+if(!r.ok){let m=j&&(j.error&&(j.error.message||j.error)||j.message||j.detail)||t.slice(0,200)||('HTTP '+r.status);let e=new Error(typeof m==='object'?JSON.stringify(m).slice(0,200):String(m));e.st=r.status;throw e}
+if(!j)throw new Error('Resposta inválida do serviço.');return j}
+function aiUrl(u){u=String(u||'').trim().replace(/\/+$/,'');if(!u)throw new Error('URL');if(!/^https:\/\//i.test(u)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(u))throw new Error('O endereço da API precisa começar com https://');return /\/chat\/completions$/.test(u)?u:u+'/chat/completions'}
+async function aiCall(msgs,sys){let a=AIC(),p=a.p,P=AIP[p],key=(a.k[p]||'').trim(),mdl=(a.m[p]||'').trim()||P.m;
+if(!P.opt&&!key)throw new Error('KEY');if(p==='cus'&&!mdl)throw new Error('MODEL');
+let c=new AbortController(),tmo=setTimeout(()=>c.abort(),90000);
+try{if(p==='gem'){let r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(mdl.replace(/^models\//,''))+':generateContent?key='+encodeURIComponent(key),{method:'POST',signal:c.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:msgs.map(m=>({role:m.r==='u'?'user':'model',parts:[{text:m.t}]})),generationConfig:{temperature:.2}})}),j=await aiJ(r),
+cn=((j.candidates||[])[0]||{}).content,tx=cn&&(cn.parts||[]).filter(x=>!x.thought).map(x=>x.text||'').join('');if(!tx)throw new Error(j.promptFeedback&&j.promptFeedback.blockReason?'A IA recusou a pergunta ('+j.promptFeedback.blockReason+').':'A IA não devolveu resposta.');return tx}
+let urls=p==='poll'?(key?['https://gen.pollinations.ai/v1/chat/completions']:['https://text.pollinations.ai/openai','https://gen.pollinations.ai/v1/chat/completions']):[p==='cus'?aiUrl(a.u):P.u],
+bd={model:mdl,messages:[{role:'system',content:sys},...msgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}))]},err;if(p!=='poll')bd.temperature=.2;
+for(let u of urls){try{let h={'Content-Type':'application/json'};if(key)h.Authorization='Bearer '+key;
+let r=await fetch(u,{method:'POST',signal:c.signal,headers:h,body:JSON.stringify(bd)}),j=await aiJ(r),ch=(j.choices||[])[0],tx=ch&&ch.message&&ch.message.content;if(Array.isArray(tx))tx=tx.map(x=>x.text||'').join('');if(!tx)throw new Error('A IA não devolveu resposta.');return String(tx).replace(/<think>[\s\S]*?<\/think>/g,'')}catch(e){err=e;if(e.name==='AbortError')throw e}}throw err}finally{clearTimeout(tmo)}}
+/* Erro em linguagem de gente: [mensagem, detalhe técnico, mostrar botão de ajustes] */
+function aiErr(e){let a=AIC(),P=AIP[a.p],m=String(e&&e.message||e),st=e&&e.st,x=m;
+if(m==='KEY')return{r:'e',t:`Para usar o ${P.n}, cole a sua chave de API em Ajustes → Assistente de IA. Se preferir não criar conta, escolha o Pollinations, que funciona sem chave.`,cfg:1};
+if(m==='MODEL'||m==='URL')return{r:'e',t:'Falta informar o '+(m==='URL'?'endereço da API':'modelo')+' da IA em Ajustes → Assistente de IA.',cfg:1};
+if(e&&e.name==='AbortError')return{r:'e',t:`O ${P.n} demorou demais para responder. Tente de novo daqui a pouco.`};
+if(!navigator.onLine)return{r:'e',t:'Sem internet. O assistente precisa de conexão para responder.'};
+if(st===401||st===403||/api key|apikey|unauthori[sz]ed|invalid.*key|permission/i.test(m))return{r:'e',t:`O ${P.n} recusou a chave. Confira em Ajustes → Assistente de IA se ela foi copiada inteira.`,x,cfg:1};
+if(st===429||/rate|quota|limit/i.test(m))return{r:'e',t:`O limite do plano grátis do ${P.n} foi atingido por agora. Espere um pouco ou troque de serviço em Ajustes → Assistente de IA.`,x,cfg:1};
+if(st===404||/model/i.test(m))return{r:'e',t:`O ${P.n} não encontrou o modelo “${(a.m[a.p]||'').trim()||P.m}”. Deixe o campo Modelo em branco ou troque o nome em Ajustes → Assistente de IA.`,x,cfg:1};
+if(e instanceof TypeError)return{r:'e',t:`Não consegui falar com o ${P.n}.`+(a.p==='poll'?' O serviço sem cadastro pode estar fora do ar ou bloqueado; uma chave grátis do Google Gemini costuma ser mais estável.':' Confira a internet e tente de novo.'),x,cfg:a.p==='poll'||a.p==='cus'};
+return{r:'e',t:`O ${P.n} devolveu um erro.`,x,cfg:1}}
+const aiMd=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4}\s*(.+)$/gm,'<b>$1</b>').replace(/^(\s*)[-*]\s+/gm,'$1• ').replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g,'$1$2');
+let AI={l:[],busy:0};
+const AISG=['Quanto gastei hoje?','Quanto gastei este mês?','Em que categoria mais gastei este mês?','Quanto ainda falta pagar este mês?','Quanto faturei como motorista este mês?','Gastei mais ou menos que no mês passado?'];
+function aiList(){if(!AI.l.length)return`<div class="ai-hi"><span class="ai-av">${AISVG}</span><b>Pergunte sobre suas finanças</b><span>Respondo com base nos lançamentos, contas, cartões, limites e dias de motorista do app.</span><div class="ai-sg">${AISG.map((s,i)=>`<button type="button" onclick="aiSend(AISG[${i}])">${esc(s)}</button>`).join('')}</div><small style="display:block;margin-top:14px">Usando ${esc(AIP[AIC().p].n)}. Um resumo dos seus dados vai junto com cada pergunta.</small></div>`;
+return AI.l.map(m=>m.r==='e'?`<div class="ai-m e" role="alert">${esc(m.t)}${m.x?`<small style="display:block;margin-top:4px;overflow-wrap:anywhere">${esc(m.x)}</small>`:''}${m.cfg?`<button class="add" onclick="closeF();ajGo('ai')">Abrir ajustes do assistente</button>`:''}</div>`:`<div class="ai-m ${m.r}">${m.r==='a'?aiMd(m.t):esc(m.t)}</div>`).join('')+(AI.busy?'<div class="ai-m a"><span class="ai-dots" role="status" aria-label="Pensando"><i></i><i></i><i></i></span></div>':'')}
+function aiR(){let i=$('#aiq'),v=i?i.value:'',P=AIP[AIC().p];$('#sheet').innerHTML=`<div class="ai-h"><span class="ai-av">${AISVG}</span><div><b>Assistente</b><small>${esc(P.n)} · só lê os dados do app</small></div>${AI.l.length&&!AI.busy?'<button class="ai-hb" onclick="AI.l=[];aiR()">Limpar</button>':''}<button class="ai-hb" onclick="closeF();ajGo('ai')">Ajustes</button><button class="tf-x" onclick="closeF()" aria-label="Fechar">✕</button></div><div class="ai-l" id="ail" aria-live="polite">${aiList()}</div><form class="ai-f" onsubmit="event.preventDefault();aiSend()"><textarea id="aiq" rows="1" placeholder="Pergunte sobre seus gastos…" aria-label="Sua pergunta" enterkeyhint="send" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend()}"></textarea><button type="submit" aria-label="Enviar" ${AI.busy?'disabled':''}>↑</button></form>`;
+let n=$('#aiq');n.value=v;if(v)n.style.height=n.scrollHeight+'px';let l=$('#ail');l.scrollTop=l.scrollHeight}
+function aiOpen(){fabT(false);let sh=$('#sheet');sh.className='sheet ai';sh.oninput=sh.onchange=null;aiR();$('#modal').classList.add('open');if(matchMedia('(min-width:700px)').matches)setTimeout(()=>{let i=$('#aiq');if(i)i.focus()},60)}
+async function aiSend(q){let i=$('#aiq');q=String(q??(i?i.value:'')).trim();if(!q||AI.busy)return;if(i){i.value='';i.style.height=''}
+let h=[];for(let j=0;j<AI.l.length-1;j++)if(AI.l[j].r==='u'&&AI.l[j+1].r==='a')h.push(AI.l[j],AI.l[j+1]);h=h.slice(-8);h.push({r:'u',t:q});
+AI.l.push({r:'u',t:q});AI.busy=1;aiR();
+try{let tx=await aiCall(h,AISYS+'\n\n# Dados do app\n'+aiCtx(h.filter(m=>m.r==='u').slice(-3).map(m=>m.t).join(' ')));AI.l.push({r:'a',t:tx.trim()})}catch(e){AI.l.push(aiErr(e))}
+AI.busy=0;if($('#sheet').classList.contains('ai')&&$('#modal').classList.contains('open'))aiR()}
+async function aiTest(b){let o=$('#aitr');b.disabled=true;o.className='';o.textContent='Testando…';
+try{let t=await aiCall([{r:'u',t:'Responda só com a palavra OK.'}],'Teste de conexão.');o.className='gr';o.textContent='Funcionou! Resposta: '+String(t).replace(/[*#]/g,'').trim().slice(0,80)}catch(e){let r=aiErr(e);o.className='rd';o.textContent=r.t+(r.x?' ('+r.x+')':'')}b.disabled=false}
+function aiCfg(){let a=AIC(),p=a.p,P=AIP[p];
+return`<div class="card" id="aj-aip"><h2>Qual IA usar</h2><small>É ela que responde às perguntas feitas no botão ✦, no canto da tela.</small><div class="opt" style="margin-top:10px">${AIK.map(k=>`<button class="${k===p?'on':''}" onclick="AIC().p='${k}';save()">${AIP[k].n}<small>${AIP[k].s}</small></button>`).join('')}</div></div>
+<div class="card" id="aj-aik"><h2>${esc(P.n)}</h2><small>${esc(P.d)}</small>${P.link?`<a class="add" style="display:block;text-align:center;text-decoration:none" href="${P.link}" target="_blank" rel="noopener">Criar chave em ${P.link.replace(/^https:\/\//,'')} ↗</a>`:''}
+${p==='cus'?`<label style="margin-top:12px">Endereço da API</label><input value="${esc(a.u)}" placeholder="https://api.openai.com/v1" onchange="AIC().u=this.value.trim();persist()" autocomplete="off" spellcheck="false" inputmode="url">`:''}
+<label style="margin-top:12px">Chave de API${P.opt?' (opcional)':''}</label><input type="password" value="${esc(a.k[p]||'')}" placeholder="${P.opt?'Pode deixar em branco':'Cole aqui a sua chave'}" onchange="AIC().k['${p}']=this.value.trim();persist()" autocomplete="off" spellcheck="false">
+<label style="margin-top:12px">Modelo</label><input value="${esc(a.m[p]||'')}" placeholder="${esc(P.m||'ex.: gpt-4o-mini')}" onchange="AIC().m['${p}']=this.value.trim();persist()" autocomplete="off" spellcheck="false"><small style="display:block;margin-top:6px">${P.m?'Deixe em branco para usar o padrão ('+esc(P.m)+').':'Nome do modelo, como aparece na documentação do serviço.'}</small>
+<button class="add" onclick="aiTest(this)">Testar conexão</button><small id="aitr" role="status" style="display:block;margin-top:6px"></small></div>
+<div class="card"><h2>Privacidade</h2><small>Nada é enviado enquanto você não pergunta. A cada pergunta, o app manda ao serviço escolhido um resumo dos seus dados: totais por mês e por categoria, saldos, cartões, limites, dias de motorista e os lançamentos dos meses ligados à pergunta. A chave fica salva na sua conta junto com os outros ajustes, mas não vai nos backups exportados. O assistente só lê: não cria, altera nem apaga nada.</small></div>`}
 applyTheme();render();
 setInterval(()=>{if(document.visibilityState==='visible'&&IC().auto&&['wealth','home'].includes(page)&&!$('#modal').classList.contains('open'))qRefresh()},60000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&IC().auto&&Date.now()-QS.at>60000)qRefresh()});
