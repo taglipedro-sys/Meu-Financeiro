@@ -88,6 +88,7 @@ label{display:block;color:var(--mu);font-size:11px;margin-bottom:4px}input,selec
 .fab-menu{position:fixed;right:max(16px,calc(50vw - 424px));bottom:calc(140px + env(safe-area-inset-bottom,0px));z-index:9;display:flex;flex-direction:column-reverse;align-items:flex-end;gap:10px;pointer-events:none;max-height:calc(100vh - 160px);overflow:visible}
 @media(min-width:800px){.fab-menu{right:28px;bottom:92px}}
 .fab-it{--c:var(--g);display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;color:var(--tx);font:inherit;cursor:pointer;opacity:0;transform:translateY(16px) scale(.9);transform-origin:right center;transition:transform .22s cubic-bezier(.3,1.3,.6,1),opacity .16s;pointer-events:none}
+.apl{display:flex;flex-direction:column;gap:6px;margin:10px 0}.apl button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--in);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--tx);font:inherit;cursor:pointer}.apl .acn{flex:1;min-width:0}.apl .acn b,.apl .acn small{display:block}.apl .acn small{color:var(--mu)}.apsl{margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}.apsl .row{padding:6px 0}
 .fab-it.r{--c:var(--r)}.fab-it.b{--c:var(--b)}.fab-it.o{--c:var(--o)}
 .fab-it small{order:-1;background:var(--card);color:var(--tx);font-size:14px;font-weight:600;padding:7px 12px;border-radius:10px;white-space:nowrap;box-shadow:0 4px 14px #0007}
 .fab-it span{position:relative;width:48px;height:48px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:21px;box-shadow:0 4px 14px #0008;flex:none}
@@ -444,6 +445,7 @@ s.tx.forEach(t=>{if(t.cat!=null)t.cat=Rc(t.cat);['acct','from','to'].forEach(k=>
 const num=(a,ks)=>a.forEach(o=>ks.forEach(k=>{if(o[k]!==undefined&&o[k]!==''){let n=+o[k];o[k]=isFinite(n)?n:0}}));
 num(s.tx,['amount']);num(s.accts,['balance']);num(s.cards,['limit','used','closing','due']);num(s.days,['uber','n99','part','trips','hours','km','fuel','odo']);num(s.fuelLogs,['liters','priceL','total','odo']);num(s.budgets,['limit']);num(s.vehicles,['km']);num(s.inv,['qty','applied','amount','cur','rate','pxu','fx','avg','tot','px','at']);num(Object.values(s.plans).filter(p=>p&&typeof p==='object'),['wife','other','target','fuelPlan']);num([s],['goal','fuelPlan']);num([s.prefs.inv],['cdi','ipca']);
 s.tx.forEach(t=>{if(!okD(t.date))t.date=td;if(t.nd!==true)delete t.nd;if(t.po!==true)delete t.po;if(t.ip!==true||t.po)delete t.ip;if(!Array.isArray(t.tags))t.tags=[];t.tags=t.tags.map(String)});s.days.forEach(d=>{if(!okD(d.date))d.date=td});s.fuelLogs.forEach(f=>{if(!okD(f.date))f.date=td});s.inv.forEach(i=>{['date','due','curAt'].forEach(k=>{if(i[k]&&!okD(i[k]))delete i[k]})});
+s.inv.forEach(i=>{if(i.aps===undefined)return;if(!Array.isArray(i.aps)){delete i.aps;return}i.aps=i.aps.filter(x=>x&&typeof x==='object'&&okD(x.date)&&+x.v>0).map(x=>{let r={id:okId(x.id)?String(x.id):nid(),date:x.date,v:+x.v};if(+x.q>0)r.q=+x.q;if(x.txId)r.txId=Rt(x.txId);return r});if(!i.aps.length)delete i.aps});
 ['accts','cards'].forEach(k=>s[k].forEach(a=>{['color','bg'].forEach(c=>{if(a[c]&&!okC(a[c]))delete a[c]});if(a.logo&&!/^data:image\/(png|jpe?g|gif|webp);base64,[\w+/=]+$/.test(a.logo))delete a.logo}));
 s.prefs.invTags.forEach(t=>{if(!okC(t.c))t.c='#9ca3af';t.n=String(t.n??'Tag')});if(!okC(s.profile.color))s.profile.color='#2563eb';
 {let A=s.prefs.ai,o=x=>{let r={};if(x&&typeof x==='object'&&!Array.isArray(x))AIK.forEach(k=>{if(typeof x[k]==='string')r[k]=x[k].trim().slice(0,500)});return r};if(!A||typeof A!=='object'||Array.isArray(A))A={};s.prefs.ai={p:AIK.includes(A.p)?A.p:'poll',k:o(A.k),m:o(A.m),u:typeof A.u==='string'?A.u.trim().slice(0,500):''}}
@@ -990,7 +992,15 @@ if(ok||(!force&&RT.fail===td))return;
 let get=async(c,f0)=>(await getJ(`https://api.bcb.gov.br/dados/serie/bcdata.sgs.${c}/dados?formato=json&dataInicial=${brD(f0||from)}&dataFinal=${brD(td)}`,20000)).map(x=>[fromBr(x.data),+x.valor]);
 try{let o={day:td,from};if(need.has('cdi')||need.has('cdi+')||need.has('pre')||need.has('selic'))o.cdi=await get(12);if(need.has('selic'))o.selic=await get(11);if(need.has('ipca')){o.ipca=await get(433,from.slice(0,8)+'01');if(!o.cdi)o.cdi=await get(12)}RT=o}catch(e){RT.fail=td}}
 function rfLbl(a){let r=nf(+a.rate||0,2).replace(/,00$/,''),i=idxOf(a);return i==='cdi'?r+'% do CDI':i==='cdi+'?'CDI + '+r+'%':i==='pre'?r+'% a.a.':i==='ipca'?'IPCA + '+r+'%':'Selic + '+r+'%'}
-function rfCalc(a,E){let P=+a.applied||0,td=E||iso(new Date()),st=a.date||td,end=a.due&&a.due<td?a.due:td,idx=idxOf(a),r=(+a.rate||0)/100,ic=IC(),got=RT.from&&RT.from<=st,
+/* Aportes (a.aps: [{id,date,v,q?,txId?}]): a.applied é o total aplicado; a 1ª aplicação é applied − soma dos aportes.
+   Em renda fixa, Tesouro e poupança cada aporte rende a partir da própria data (e tem o próprio prazo de IR). */
+const apSum=a=>sum(a.aps||[],x=>+x.v||0),apFut=(a,E)=>sum((a.aps||[]).filter(x=>x.date>E),x=>+x.v||0),
+trn=a=>[{v:Math.max(0,(+a.applied||0)-apSum(a)),date:a.date}].concat((a.aps||[]).map(x=>({v:+x.v||0,date:x.date})));
+function rfCalc(a,E){if(!a.aps||!a.aps.length)return rfCalc1(a,E);let td=E||iso(new Date()),r={v:0,ir:0,net:0,est:false,n:0,cal:0};
+trn(a).forEach(t=>{if(t.date&&t.date>td)return;let c=rfCalc1({...a,applied:t.v,date:t.date},E);r.v+=c.v;r.ir+=c.ir;r.net+=c.net;r.est=r.est||c.est;r.n=Math.max(r.n,c.n);r.cal=Math.max(r.cal,c.cal)});return r}
+const poupM=(d,E)=>{let s=new Date((d||E)+'T12:00:00'),n=new Date(E+'T12:00:00');return Math.max(0,(n.getFullYear()-s.getFullYear())*12+n.getMonth()-s.getMonth()-(n.getDate()<s.getDate()?1:0))},
+poupV=(a,E)=>sum(trn(a).filter(t=>!t.date||t.date<=E),t=>t.v*Math.pow(1.005,poupM(t.date,E)));
+function rfCalc1(a,E){let P=+a.applied||0,td=E||iso(new Date()),st=a.date||td,end=a.due&&a.due<td?a.due:td,idx=idxOf(a),r=(+a.rate||0)/100,ic=IC(),got=RT.from&&RT.from<=st,
 sl=arr=>got&&Array.isArray(arr)?arr.filter(x=>x[0]>=st&&x[0]<end):null,cdiS=sl(RT.cdi),selS=sl(RT.selic),cal=Math.max(0,(new Date(end)-new Date(st))/864e5),n=cdiS?cdiS.length:Math.round(cal*252/365),est=false,f=1,cdiD=Math.pow(1+(+ic.cdi||0)/100,1/252)-1;
 if(idx==='cdi'){let p=(+a.rate||100)/100;if(cdiS)f=cdiS.reduce((m,x)=>m*(1+x[1]/100*p),1);else{est=true;f=Math.pow(1+cdiD*p,n)}}
 else if(idx==='cdi+'||idx==='selic'){let s=idx==='selic'?selS:cdiS,b=s?s.reduce((m,x)=>m*(1+x[1]/100),1):(est=true,Math.pow(1+cdiD,n));f=b*Math.pow(1+r,n/252)}
@@ -1000,11 +1010,11 @@ let v=P*f,g=v-P,ir=0;if(!a.isento&&g>0)ir=g*(cal<=180?.225:cal<=360?.2:cal<=720?
 function aVal(a){let ty=a.type||'outro',q=+a.qty||0,o={price:null,chg:null,src:'',at:0,est:false,day:0};
 if(AT[ty]&&AT[ty].live){let c=QC[qk(a)];if(c){o.price=c.p;o.chg=c.chg;o.src=c.src;o.at=c.at}else if(a.px){o.price=+a.px;o.src='último valor salvo';o.at=a.at||0;o.old=true}o.cost=+a.applied||0;o.value=o.price!=null?q*o.price:o.cost}
 else if(ty==='ext'){let u=QC['f:USD'],fx=u?u.p:(+a.fx||0);o.price=+a.pxu||0;o.fx=fx;o.cost=+a.applied||0;o.value=q*o.price*fx||o.cost;o.chg=u?u.chg:null;o.src=u?'dólar via '+u.src:'dólar salvo';o.at=u?u.at:0}
-else if(ty==='tesouro'||ty==='rf'){let c=rfCalc(a);o.value=c.v;o.net=c.net;o.ir=c.ir;o.cost=+a.applied||0;o.est=c.est;o.src=c.est?'estimativa com as taxas de reserva':'índices do Banco Central'}
-else if(ty==='poup'){let P=+a.applied||0,s=new Date((a.date||iso(new Date()))+'T12:00:00'),n=new Date(),m=(n.getFullYear()-s.getFullYear())*12+n.getMonth()-s.getMonth()-(n.getDate()<s.getDate()?1:0);m=Math.max(0,m);o.value=P*Math.pow(1.005,m);o.cost=P;o.est=true;o.src=m+(m===1?' mês completo':' meses completos')+' a 0,5%'}
+else if(ty==='tesouro'||ty==='rf'){let c=rfCalc(a);o.value=c.v;o.net=c.net;o.ir=c.ir;o.cost=(+a.applied||0)-apFut(a,iso(new Date()));o.est=c.est;o.src=c.est?'estimativa com as taxas de reserva':'índices do Banco Central'}
+else if(ty==='poup'){let td=iso(new Date()),m=poupM(a.date,td);o.value=poupV(a,td);o.cost=(+a.applied||0)-apFut(a,td);o.est=true;o.src=m+(m===1?' mês completo':' meses completos')+' a 0,5%'}
 else{o.cost=+a.applied||0;o.value=a.cur!==undefined&&a.cur!==''?+a.cur:(+a.amount||o.cost);o.src='valor informado'+(a.curAt?' em '+br(a.curAt):'')}
 o.gain=o.value-o.cost;o.pct=o.cost?o.gain/o.cost*100:null;if(o.chg!=null&&isFinite(o.chg)&&o.at&&!o.old)o.day=o.value-o.value/(1+o.chg/100);return o}
-function invSync(){db.inv.forEach(a=>{if(!a.type)return;let v=aVal(a);a.amount=r2(v.value);a.applied=r2(v.cost);if(AT[a.type]&&AT[a.type].live&&v.price!=null&&!v.old){a.px=v.price;a.at=v.at}})}
+function invSync(){db.inv.forEach(a=>{if(!a.type)return;let v=aVal(a);a.amount=r2(v.value);if(!['tesouro','rf','poup'].includes(a.type))a.applied=r2(v.cost);if(AT[a.type]&&AT[a.type].live&&v.price!=null&&!v.old){a.px=v.price;a.at=v.at}})}
 async function qRefresh(force){if(QS.busy)return;let L=db.inv.filter(a=>a.type);if(!L.length){QS.at=Date.now();return}QS.busy=true;QS.t0=Date.now();updStatus();
 let old=(k,ms)=>force||!QC[k]||Date.now()-QC[k].at>ms,coins=[...new Set(L.filter(a=>a.type==='cripto'&&a.sym).map(a=>a.sym))].filter(id=>old('c:'+id,50000)),b3=[...new Set(L.filter(a=>(AT[a.type]||{}).b3&&a.sym).map(a=>a.sym))].filter(t=>old('b:'+t,600000)),fx=new Set(L.filter(a=>a.type==='moeda'&&a.sym).map(a=>a.sym));if(L.some(a=>a.type==='ext'))fx.add('USD');fx=[...fx].filter(c=>old('f:'+c,50000));
 try{await Promise.all([qCoins(coins),...b3.map(qB3),qFx(fx),qRates(force),qHist()])}catch(e){}
@@ -1050,8 +1060,8 @@ async function qHist(){if(HS.busy)return;let need=hNeed();if(!need.length)return
 await Promise.all(need.map(async k=>{let id=k.slice(2),pts=k[0]==='c'?await hCoin(id):k[0]==='b'?await hB3(id):await hFx(id),m=hPts(pts);HC[k]=Object.keys(m).length?{day:td,m}:{day:td,m:(HC[k]&&HC[k].m)||{},fail:1}}));
 HS.busy=false;hSave();if(page==='wealth'&&!$('#modal').classList.contains('open'))rtRedraw()}
 function aValAt(a,k){let e=mEnd(k),ty=a.type||'outro',q=+a.qty||0,c=+a.applied||0;if(!a.date)return{nod:1};if(a.date>e)return{none:1};
-if(ty==='tesouro'||ty==='rf')return{v:rfCalc(a,e).v,c};
-if(ty==='poup'){let s=new Date(a.date+'T12:00:00'),n=new Date(e+'T12:00:00'),m=Math.max(0,(n.getFullYear()-s.getFullYear())*12+n.getMonth()-s.getMonth()-(n.getDate()<s.getDate()?1:0));return{v:c*Math.pow(1.005,m),c}}
+c-=apFut(a,e);q-=sum((a.aps||[]).filter(x=>x.date>e),x=>+x.q||0);if(ty==='tesouro'||ty==='rf')return{v:rfCalc(a,e).v,c};
+if(ty==='poup')return{v:poupV(a,e),c};
 let key=ty!=='ext'&&qk(a);if(key){let p=hPrice(key,k);if(p!=null)return{v:q*p,c}}return{miss:1}}
 function rtData(n){let now=curK(),e=ym()>now?now:ym(),A=inIn(),tags=[...TGS(),NOTAG],a=[];
 for(let i=n-1;i>=0;i--){let k=ymAdd(e,-i),r={k,l:M[+k.slice(5,7)-1],t:{},src:''};
@@ -1107,13 +1117,42 @@ res=`<div class="card wide"><h2>Onde aplicar ${money(c.X)}</h2><small>A divisão
 <div class="ipres">${L.map(r=>`<div class="ipa ${r.al?'':'z'}"><div class="rw"><b><i class="tgd" style="background:${r.t.c}"></i>${esc(r.t.n)}</b><b>${r.al?money(r.al):'—'}</b></div><div class="ipab"><i style="width:${r.al/mx*100}%;background:${r.t.c}"></i></div><small>${r.al?`Fica com ${pc(r.np)} da carteira`:r.t===NOTAG?'Sem meta definida':'Nada agora: já está na meta ou acima'}${r.t!==NOTAG?' · meta '+pc(r.m):''}${r.al&&r.l.length?' · seus ativos: '+r.l.map(x=>esc(x.a.name)).join(', '):''}</small></div>`).join('')}</div>
 <button class="add" onclick="assetPick()">＋ Registrar a aplicação</button></div>`}
 return metas+ap+res}
-function assetPick(){let sh=$('#sheet');sh.className='sheet';sh.oninput=sh.onchange=null;sh.innerHTML=`<h2>Qual tipo de ativo?</h2><div class="atg">${ATO.map(k=>`<button type="button" onclick="assetForm(null,'${k}')"><span>${AT[k].i}</span><b>${AT[k].n}</b><small>${AT[k].d}</small></button>`).join('')}</div><div class="act"><button class="b2" onclick="closeF()">Cancelar</button></div>`;$('#modal').classList.add('open')}
-let AF=null,AFT=0;
+function assetPick(){let sh=$('#sheet');sh.className='sheet';sh.oninput=sh.onchange=null;sh.innerHTML=`<h2>Qual tipo de ativo?</h2><div class="atg">${ATO.map(k=>`<button type="button" onclick="apPick('${k}')"><span>${AT[k].i}</span><b>${AT[k].n}</b><small>${AT[k].d}</small></button>`).join('')}</div><div class="act"><button class="b2" onclick="closeF()">Cancelar</button></div>`;$('#modal').classList.add('open')}
+let AF=null,AFT=0,AP=null;
+/* Tipo escolhido no ＋: se já existe ativo desse tipo, oferece aporte em um deles ou um ativo novo. */
+function apPick(k){let L=db.inv.filter(x=>(x.type||'outro')===k);if(!L.length){assetForm(null,k);return}let sh=$('#sheet');sh.className='sheet';sh.oninput=sh.onchange=null;
+sh.innerHTML=`<h2>${AT[k].i} ${AT[k].n}</h2><small class="mu">Aplicar mais em um que você já tem:</small><div class="apl">${L.map(a=>{let v=aVal(a);return`<button type="button" onclick="apForm('${a.id}')">${aIco(a)}<span class="acn"><b>${esc(a.name)}</b><small>${money(v.value)}${a.out?' · fora do saldo':''}</small></span><span class="tf-ch">›</span></button>`}).join('')}</div><button class="add" onclick="assetForm(null,'${k}')">＋ Novo ativo de ${AT[k].n.toLowerCase()}</button><div class="act"><button class="b2" onclick="assetPick()">Voltar</button></div>`;$('#modal').classList.add('open')}
+function apForm(id){let a=db.inv.find(x=>x.id===id);if(!a)return;let ty=a.type||'outro',lv=AT[ty]&&AT[ty].live,fs=[{n:'_hd',t:'html',w:1,l:'',h:`<div class="athd">${aIco(a)}<div><b>${esc(a.name)}</b><small>Hoje: ${money(aVal(a).value)} · investido ${money(+a.applied||0)}</small></div></div>`,get:()=>0}];
+AP={id,pacct:(db.accts[0]||{}).id||''};
+if(lv||ty==='ext')fs.push(N(ty==='moeda'?'Quantidade (na moeda)':ty==='cripto'?'Quantidade (ex.: 0,0125)':'Quantidade (cotas/ações)','q',1));
+fs.push(N(lv?'Preço por unidade (R$)':ty==='ext'?'Total investido (R$)':'Valor do aporte (R$)',lv?'px':'v',1));
+fs.push({n:'date',l:'Data do aporte',t:'date',w:1});
+fs.push({n:'pacct',l:'Pagar com a conta',t:'html',w:1,h:'<div id="app"></div>',get:()=>AP.pacct});
+fs.push({n:'_n',l:'',t:'html',w:1,h:'<small id="apn" class="mu"></small>',get:()=>0});
+form('Novo aporte',fs,{date:iso(new Date())},o=>apSave(o,a),null,apVis);apAccR()}
+function apAccR(){let e=$('#app');if(e)e.innerHTML=acList(AP.pacct,id=>`AP.pacct='${id}';apAccR();apVis()`,{none:'Não lançar (só registrar o aporte)',cards:false})}
+function apVal(o,a){let ty=a.type||'outro',lv=AT[ty]&&AT[ty].live,q=+o.q||0;return lv?r2(q*(+o.px||0)):+o.v||0}
+function apVis(){let a=AP&&db.inv.find(x=>x.id===AP.id),e=$('#apn');if(!a||!e)return;let o={};['q','px','v'].forEach(k=>{let i=$(`#sheet [name=${k}]`);if(i)o[k]=+i.value||0});let v=apVal(o,a),ty=a.type||'outro';
+e.innerHTML=(v>0?`Aporte de <b>${money(v)}</b>. Investido passa a ${money((+a.applied||0)+v)}. `:'')+(['tesouro','rf','poup'].includes(ty)?'Este valor rende a partir da data do aporte. ':'')+(AP.pacct?'Cria uma saída em Lançamentos (categoria Investimentos) e desconta da conta. Não conta como despesa do mês.':'Entra só na carteira. Nada muda nos seus lançamentos.')}
+function apSave(o,a){let ty=a.type||'outro',lv=AT[ty]&&AT[ty].live,q=+o.q||0,v=apVal(o,a),td=iso(new Date()),dt=o.date||td;
+if((lv||ty==='ext')&&!(q>0)){alert('Informe a quantidade.');return false}if(!(v>0)){alert(lv?'Informe o preço por unidade.':'Informe o valor do aporte.');return false}
+let r={id:nid(),date:dt,v:r2(v)};if(lv||ty==='ext')r.q=q;
+if(o.pacct){let t={id:nid(),desc:'Aporte · '+a.name,type:'expense',amount:r.v,cat:invCat().id,date:dt,acct:o.pacct,paid:dt<=td,tags:['investimento']};db.tx.push(t);if(t.paid)eff(t,1);r.txId=t.id}
+apApply(a,r,1);a.aps=(a.aps||[]).concat(r);setTimeout(()=>qRefresh(),60)}
+/* Soma (s=1) ou desfaz (s=-1) um aporte nos campos do ativo. */
+function apApply(a,r,s){let ty=a.type||'outro',lv=AT[ty]&&AT[ty].live;a.applied=r2((+a.applied||0)+s*r.v);
+if(lv||ty==='ext'){a.qty=Math.max(0,(+a.qty||0)+s*(+r.q||0));if(lv){a.avg=a.qty?a.applied/a.qty:0;a.tot=r2(a.applied)}}
+if(['fundo','prev','outro'].includes(ty)&&a.cur!==undefined&&a.cur!=='')a.cur=r2(+a.cur+s*r.v);
+let v=aVal(a);a.amount=r2(v.value)}
+function apDel(aid,rid){let a=db.inv.find(x=>x.id===aid),r=a&&(a.aps||[]).find(x=>x.id===rid);if(!r)return;let t=r.txId&&db.tx.find(x=>x.id===r.txId);
+if(!confirm(`Excluir o aporte de ${money(r.v)} de ${br(r.date)}/${r.date.slice(0,4)}?${t?` O lançamento em ${an(t.acct)} também é excluído${t.paid?' e o valor volta para a conta':''}.`:''}`))return;
+if(t){if(t.paid)eff(t,-1);db.tx=db.tx.filter(x=>x!==t)}apApply(a,r,-1);a.aps=a.aps.filter(x=>x!==r);if(!a.aps.length)delete a.aps;save();assetForm(aid)}
 function assetForm(id,type){let a=db.inv.find(x=>x.id===id),ty=a?(a.type||'outro'):type;if(!ty){assetPick();return}let t=AT[ty],v=a?{...a}:{type:ty,date:iso(new Date()),mode:'avg'};
 if(!a){if(ty==='rf'){v.sub='CDB';v.idx='cdi';v.rate=100}if(ty==='tesouro')v.td='selic';if(ty==='moeda')v.sym='USD'}if(v.tot===undefined&&v.applied)v.tot=v.applied;if(!v.mode)v.mode='avg';
+if(a&&a.aps&&a.aps.length&&['tesouro','rf','poup','fundo','prev','outro'].includes(ty))v.applied=r2((+a.applied||0)-apSum(a));
 let lk=a&&a.txId?db.tx.find(x=>x.id===a.txId):null;v.pacct=a?(lk?lk.acct:''):((db.accts[0]||{}).id||'');v.out=!!(a&&a.out);
 AF={pacct:v.pacct,ty,id,coin:ty==='cripto'&&a&&a.sym?{id:a.sym,sym:a.tk,name:a.name}:null,sub:undefined,fk:'',tag:a?(a.tag||''):tagDef(ty),lk};
-let fs=[{n:'_hd',t:'html',w:1,l:'',h:`<div class="athd"><span>${t.i}</span><div><b>${t.n}</b><small>${t.d}</small></div>${a?'':'<button type="button" class="vt" onclick="assetPick()">Trocar</button>'}</div>`,get:()=>0}],live=['cripto','moeda'].includes(ty)||t.b3,NUM=(n,l,w)=>({n,l,t:'number',st:'any',w});
+let fs=[{n:'_hd',t:'html',w:1,l:'',h:`<div class="athd"><span>${t.i}</span><div><b>${t.n}</b><small>${t.d}</small></div>${a?`<button type="button" class="vt" onclick="apForm('${a.id}')">＋ Novo aporte</button>`:'<button type="button" class="vt" onclick="assetPick()">Trocar</button>'}</div>${a&&a.aps&&a.aps.length?`<div class="apsl"><b>Aportes</b>${a.aps.slice().sort((x,y)=>x.date.localeCompare(y.date)).map(r=>`<div class="row"><span>${br(r.date)}/${r.date.slice(0,4)}${r.q?' · '+nf(r.q,8).replace(/,?0+$/,'')+' un.':''}</span><span><b>${money(r.v)}</b> <button type="button" class="vt" onclick="apDel('${a.id}','${r.id}')" aria-label="Excluir aporte">✕</button></span></div>`).join('')}<small class="mu">${['tesouro','rf','poup','fundo','prev','outro'].includes(ty)?'O valor aplicado abaixo é o da 1ª aplicação; os aportes somam por cima.':'Quantidade e preço médio abaixo já incluem os aportes.'}</small></div>`:''}`,get:()=>0}],live=['cripto','moeda'].includes(ty)||t.b3,NUM=(n,l,w)=>({n,l,t:'number',st:'any',w});
 if(ty==='cripto')fs.push({n:'_coin',l:'Moeda',t:'html',w:1,h:'<div id="afc"></div>',get:()=>0});
 if(t.b3)fs.push({n:'sym',l:'Código (ticker)',w:1,ph:{acao:'Ex.: PETR4',fii:'Ex.: MXRF11',etf:'Ex.: BOVA11',bdr:'Ex.: AAPL34'}[ty]});
 if(ty==='ext')fs.push({n:'sym',l:'Código (ticker)',ph:'Ex.: AAPL, VOO'});
@@ -1125,7 +1164,7 @@ if(ty==='tesouro'||ty==='rf')fs.push(NUM('rate','Taxa'));
 if(live||ty==='ext')fs.push(NUM('qty',ty==='moeda'?'Quantidade (na moeda)':ty==='cripto'?'Quantidade (ex.: 0,0125)':'Quantidade (cotas/ações)'));
 if(live){fs.push(S('mode','Como informar o custo',[['avg','Preço médio'],['tot','Total investido']]));fs.push(NUM('avg',ty==='moeda'?'Cotação média paga (R$)':'Preço médio por unidade (R$)'));fs.push(NUM('tot','Total investido (R$)'))}
 if(ty==='ext'){fs.push(NUM('pxu','Cotação atual (US$)'));fs.push(NUM('applied','Total investido (R$)'))}
-if(['tesouro','rf','poup','fundo','prev','outro'].includes(ty))fs.push(NUM('applied','Valor aplicado (R$)'));
+if(['tesouro','rf','poup','fundo','prev','outro'].includes(ty))fs.push(NUM('applied',a&&a.aps&&a.aps.length?'Valor da 1ª aplicação (R$)':'Valor aplicado (R$)'));
 if(['fundo','prev','outro'].includes(ty))fs.push(NUM('cur','Valor atual (R$)'));
 fs.push({n:'date',l:['tesouro','rf','poup'].includes(ty)?'Data da aplicação':'Data da compra',t:'date'});
 if(ty==='tesouro'||ty==='rf')fs.push({n:'due',l:'Vencimento',t:'date'});
@@ -1141,7 +1180,7 @@ function afAccR(){let e=$('#afp');if(e)e.innerHTML=acList(AF.pacct,id=>`AF.pacct
 function afTagR(){let e=$('#aft');if(!e)return;e.innerHTML=`<div class="chips tgc">${TGS().map(t=>`<button type="button" class="${AF.tag===t.id?'on':''}" style="--tc:${t.c}" onclick="AF.tag=AF.tag==='${t.id}'?'':'${t.id}';afTagR()" aria-pressed="${AF.tag===t.id}"><i style="background:${t.c}"></i>${esc(t.n)}</button>`).join('')}<button type="button" class="nw" onclick="afTagNew()">＋ Nova tag</button></div>`}
 function afTagNew(){let n=(prompt('Nome da nova tag')||'').trim();if(!n)return;let L=TGS(),ex=L.find(t=>t.n.toLowerCase()===n.toLowerCase());if(ex){AF.tag=ex.id;afTagR();return}let t={id:'t'+nid(),n,c:TGP[L.length%TGP.length]};L.push(t);AF.tag=t.id;persist();afTagR()}
 function invCat(){let c=db.cats.find(x=>x.inv)||db.cats.find(x=>x.type==='expense'&&x.name==='Investimentos');if(!c){c={id:nid(),name:'Investimentos',icon:'📈',type:'expense'};db.cats.push(c)}c.inv=true;return c}
-function assetDel(a){let t=a.txId&&db.tx.find(x=>x.id===a.txId);if(t&&confirm(`Excluir também o lançamento de ${money(t.amount)} em ${an(t.acct)}?${t.paid?' O valor volta para a conta.':''}`)){if(t.paid)eff(t,-1);db.tx=db.tx.filter(x=>x!==t)}db.inv=db.inv.filter(x=>x!==a)}
+function assetDel(a){let L=[a.txId,...(a.aps||[]).map(r=>r.txId)].filter(Boolean).map(id=>db.tx.find(x=>x.id===id)).filter(Boolean),tot=sum(L,t=>t.amount);if(L.length&&confirm(L.length===1?`Excluir também o lançamento de ${money(tot)} em ${an(L[0].acct)}?${L[0].paid?' O valor volta para a conta.':''}`:`Excluir também os ${L.length} lançamentos ligados a este ativo (aplicação e aportes, ${money(tot)} no total)?${L.some(t=>t.paid)?' Os valores pagos voltam para as contas.':''}`)){L.forEach(t=>{if(t.paid)eff(t,-1)});db.tx=db.tx.filter(x=>!L.includes(x))}db.inv=db.inv.filter(x=>x!==a)}
 function afCoinR(){let e=$('#afc');if(!e)return;let c=AF.coin;e.innerHTML=c?`<div class="coin-sel">${aIco({type:'cripto',tk:c.sym})}<div><b>${esc(c.name)}</b><small>${esc(String(c.sym||'').toUpperCase())}</small></div><button type="button" class="vt" onclick="AF.coin=null;afCoinR();afVis()">Trocar</button></div>`:`<div class="chips">${COINS.map(x=>`<button type="button" onclick="afCoin(${esc(JSON.stringify(x))})">${x[1]}</button>`).join('')}</div><input id="afq" placeholder="Buscar outra moeda (nome ou sigla)" oninput="afSearch(this.value)" autocomplete="off"><div id="afr" class="afr"></div>`}
 function afCoin(x){AF.coin={id:x[0],sym:x[1],name:x[2]};AF.fk='';afCoinR();afVis()}
 function afSearch(q){clearTimeout(AFT);let r=$('#afr');if(!r)return;if(q.trim().length<2){r.innerHTML='';return}r.innerHTML='<small>Buscando…</small>';AFT=setTimeout(async()=>{try{let j=await getJ('https://api.coingecko.com/api/v3/search?query='+encodeURIComponent(q.trim())),L=(j.coins||[]).slice(0,8);if(!$('#afr'))return;$('#afr').innerHTML=L.map(c=>`<button type="button" onclick="afCoin(${esc(JSON.stringify([c.id,c.symbol,c.name]))})"><b>${esc(c.name)}</b><small>${esc(String(c.symbol).toUpperCase())}${c.market_cap_rank?' · #'+c.market_cap_rank+' em valor de mercado':''}</small></button>`).join('')||'<small>Nada encontrado.</small>'}catch(e){if($('#afr'))$('#afr').innerHTML='<small>Não consegui buscar agora. Use os atalhos acima ou tente de novo.</small>'}},450)}
@@ -1152,7 +1191,7 @@ if(t.b3||ty==='ext')a.sym=String(a.sym||'').trim().toUpperCase().replace(/\.SA$/
 if(ty==='moeda')a.name=(FX.find(x=>x[0]===a.sym)||[0,a.sym])[1];if(ty==='tesouro')a.name=(TDS.find(x=>x[0]===a.td)||[0,'Tesouro'])[1]+(a.due?' '+a.due.slice(0,4):'');
 if(ty==='rf')a.name=[a.sub||'CDB',a.inst].filter(Boolean).join(' ');if(ty==='poup')a.name='Poupança'+(a.inst?' '+a.inst:'');
 let q=+a.qty||0;if(t.live){if(a.mode==='tot'){a.applied=+a.tot||0;a.avg=q?a.applied/q:0}else{a.avg=+a.avg||0;a.applied=q*a.avg;a.tot=r2(a.applied)}}
-['qty','rate','applied','cur','pxu','avg','tot'].forEach(k=>{if(a[k]==='')a[k]=0});return a}
+['qty','rate','applied','cur','pxu','avg','tot'].forEach(k=>{if(a[k]==='')a[k]=0});if(base&&base.aps&&base.aps.length&&['tesouro','rf','poup','fundo','prev','outro'].includes(ty))a.applied=+a.applied+apSum(base);return a}
 function afVis(){if(!AF||!$('#apv'))return;let o=afRead(),ty=AF.ty,t=AT[ty],sh=$('#sheet'),show=(n,b)=>{let e=sh.querySelector(`[data-f="${n}"]`);if(e)e.style.display=b?'':'none'};
 if('mode'in o){show('avg',o.mode!=='tot');show('tot',o.mode==='tot')}
 if(ty==='rf'||ty==='tesouro'){let L=sh.querySelector('[data-f="rate"] label'),ix=ty==='rf'?o.idx:idxOf({type:'tesouro',td:o.td});if(L)L.textContent={cdi:'Percentual do CDI (%)','cdi+':'Taxa acima do CDI (% ao ano)',pre:'Taxa contratada (% ao ano)',ipca:'Taxa acima do IPCA (% ao ano)',selic:ty==='tesouro'?'Taxa adicional (% ao ano, ex.: 0,08)':'Taxa acima da Selic (% ao ano)'}[ix]}
@@ -1165,14 +1204,14 @@ if(ty==='ext')h=R('Dólar agora',v.fx?money(v.fx):'—')+`<small>A cotação do 
 if(!t.live||v.price!=null){h+=R('Valor atual',money(v.value))+R('Investido',money(v.cost))+R('Rentabilidade',`${v.gain>=0?'+':''}${money(v.gain)}${v.pct!=null?' · '+nf(v.pct)+'%':''}`,v.gain<0?'rd':'gr');
 if(ty==='rf'||ty==='tesouro'){h+=R('IR estimado no resgate',v.ir?'−'+money(v.ir):'isento ou sem ganho','rd')+R('Líquido se resgatar hoje',money(v.net));h+=`<small>Calculado com ${esc(v.src)}${ty==='tesouro'?'. É o valor pela taxa contratada; o preço de venda no Tesouro pode variar (marcação a mercado)':''}.</small>`}
 if(ty==='poup')h+=`<small>Estimativa: ${esc(v.src)}, sem a TR. Corrija editando o valor aplicado se precisar.</small>`}
-pv.innerHTML=h;let fh=$('#afh');if(fh){let ac=AF.pacct,lk=AF.lk&&db.tx.includes(AF.lk)?AF.lk:null;fh.innerHTML=!ac?(lk?'O lançamento ligado a este ativo será excluído e o valor volta para a conta.':'O ativo entra só na carteira. Nada muda nos seus lançamentos.'):(lk?`Já lançado em ${br(lk.date)}. Salvar atualiza o lançamento para ${money(v.cost)}.`:`Cria uma saída de ${money(v.cost)} em Lançamentos (categoria Investimentos) e desconta da conta. Não conta como despesa do mês.`)}}
+pv.innerHTML=h;let fh=$('#afh');if(fh){let ac=AF.pacct,lk=AF.lk&&db.tx.includes(AF.lk)?AF.lk:null;fh.innerHTML=!ac?(lk?'O lançamento ligado a este ativo será excluído e o valor volta para a conta.':'O ativo entra só na carteira. Nada muda nos seus lançamentos.'):(lk?`Já lançado em ${br(lk.date)}. Salvar atualiza o lançamento para ${money(v.cost-apSum(a))}.`:`Cria uma saída de ${money(v.cost-apSum(a))} em Lançamentos (categoria Investimentos) e desconta da conta. Não conta como despesa do mês.`)}}
 async function qOne(a){let k=qk(a);if(!k||!AF)return;AF.fk=k+'…';let s=k.slice(2);if(k[0]==='c')await qCoins([s]);else if(k[0]==='b')await qB3(s);else await qFx([s]);qSave();if(AF&&AF.fk===k+'…'){AF.fk=k;afVis()}}
 function assetSave(o,base){let n=afBuild(o,base),t=AT[n.type];
 if(n.type==='cripto'&&!n.sym){alert('Escolha a moeda.');return false}if((t.b3||n.type==='ext')&&!n.sym){alert('Informe o código do ativo.');return false}
 if((t.live||n.type==='ext')&&!(+n.qty>0)){alert('Informe a quantidade.');return false}if(['tesouro','rf','poup','fundo','prev','outro'].includes(n.type)&&!(+n.applied>0)){alert('Informe o valor aplicado.');return false}
 if(['fundo','prev','outro'].includes(n.type)){if(!n.name){alert('Informe o nome.');return false}if(!(+n.cur>0))n.cur=n.applied;if(!base||+base.cur!==+n.cur)n.curAt=iso(new Date())}
-if(n.type==='ext'){let u=QC['f:USD'];if(u)n.fx=u.p}let v=aVal(n);n.amount=r2(v.value);n.applied=r2(v.cost);if(t.live&&v.price!=null&&!v.old){n.px=v.price;n.at=v.at}
-let ac=o.pacct||'',lk=base&&base.txId?db.tx.find(x=>x.id===base.txId):null,td=iso(new Date()),dt=n.date||td,amt=r2(n.applied);
+if(n.type==='ext'){let u=QC['f:USD'];if(u)n.fx=u.p}let v=aVal(n);n.amount=r2(v.value);if(!['tesouro','rf','poup'].includes(n.type))n.applied=r2(v.cost);if(t.live&&v.price!=null&&!v.old){n.px=v.price;n.at=v.at}
+let ac=o.pacct||'',lk=base&&base.txId?db.tx.find(x=>x.id===base.txId):null,td=iso(new Date()),dt=n.date||td,amt=r2((+n.applied||0)-apSum(n));
 if(ac&&amt>0){let p={desc:'Aplicação · '+n.name,type:'expense',amount:amt,cat:invCat().id,date:dt,acct:ac,paid:dt<=td};if(lk){if(lk.paid)eff(lk,-1);Object.assign(lk,p);if(lk.paid)eff(lk,1)}else{lk={id:nid(),...p,tags:['investimento']};db.tx.push(lk);if(lk.paid)eff(lk,1)}n.txId=lk.id}
 else{if(lk&&!ac){if(lk.paid)eff(lk,-1);db.tx=db.tx.filter(x=>x!==lk)}if(!ac)n.txId=''}
 if(base)Object.assign(base,n);else db.inv.push({id:nid(),...n});setTimeout(()=>qRefresh(),60)}
