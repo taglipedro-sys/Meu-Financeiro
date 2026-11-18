@@ -1092,19 +1092,27 @@ function aRowC(a){let L=(a.vds||[]).slice().sort((x,y)=>x.date.localeCompare(y.d
 /* Rentabilidade de um período (fim do mês bk até o fim do mês k, ou até hoje): para cada ativo,
    valor no fim − valor no início − compras do período + o que entrou com vendas do período.
    (a 1ª compra é o aplicado − aportes + o custo do que já foi vendido, porque a venda tira esse custo do aplicado.)
-   A porcentagem divide pelo capital médio do período (método Dietz): dinheiro que entrou no meio do período pesa só pelos dias que ficou investido. */
+   A porcentagem é a variação da cota de cada ativo (aTwr), ponderada pelo capital médio do período (Dietz) de cada um; sem cotação, usa ganho ÷ capital médio. */
 const dN=d=>Math.round(new Date(d+'T12:00:00')/864e5);
 function aFlows(a,S,E){let f=[],t=trn(a);t[0].v+=vdC(a);t.forEach(x=>{if(x.date&&x.date>S&&x.date<=E&&x.v)f.push([x.date,+x.v])});(a.vds||[]).forEach(x=>{if(x.date>S&&x.date<=E)f.push([x.date,-(+x.v||0)])});return f}
-function perRet(bk,k){let now=curK(),live=k>=now,td=iso(new Date()),S=mEnd(bk),E=live?td:mEnd(k),T=Math.max(1,dN(E)-dN(S)),g=0,d=0,d2=0,est=0;
-inIn().forEach(a=>{if(a.date&&a.date>E)return;let b=aValAt(a,bk),vb,ve,fl=aFlows(a,S,E);
-if(b.none)vb=0;else if(b.v!=null)vb=b.v;else{est=1;vb=b.c!=null?b.c:aVal(a).cost}
-if(live)ve=isClosed(a)?0:aVal(a).value;else{let o=aValAt(a,k);if(o.none)ve=0;else if(o.v!=null)ve=o.v;else{est=1;ve=isClosed(a)&&(a.vds||[]).every(x=>x.date<=E)?0:aVal(a).value}}
-g+=ve-vb-sum(fl,x=>x[1]);d+=vb+sum(fl,x=>x[1]*Math.min(1,Math.max(0,(dN(E)-dN(x[0])+1)/T)));d2+=vb+sum(fl.filter(x=>x[1]>0),x=>x[1])});
-g=r2(g);let dd=d>0?d:d2;return{r:g,p:dd>0?g/dd*100:null,est}}
-/* Dia: o que mudou desde o fechamento de ontem, com a quantidade que você tinha ontem; compra de hoje conta a partir do preço pago, venda de hoje até o preço de venda. */
-function dayRet(){let td=iso(new Date()),y=iso(new Date(Date.now()-864e5)),g=0,d=0;inIn().forEach(a=>{let v=aVal(a);if(v.price==null||v.chg==null||!isFinite(v.chg)||v.old||!v.at||!(AT[a.type]&&AT[a.type].live))return;
-let p0=v.price/(1+v.chg/100),q=+a.qty||0,q0=a.date&&a.date>y?0:q-sum((a.aps||[]).filter(x=>x.date>y),x=>+x.q||0)+sum((a.vds||[]).filter(x=>x.date>y),x=>+x.q||0),fl=aFlows(a,y,td),bu=sum(fl.filter(x=>x[1]>0),x=>x[1]);
-g+=q*v.price-q0*p0-sum(fl,x=>x[1]);d+=q0*p0+bu});g=r2(g);return{r:g,p:d>0?g/d*100:null}}
+/* Variação da cota (como as corretoras mostram): encadeia o preço entre cada compra/venda, então não importa quando nem quanto você comprou.
+   Ex.: cota fechou o mês passado a 124,17 e hoje está 121,85 → −1,87%, mesmo com compras no meio. null quando falta algum preço. */
+function aTwr(a,S,E,pS,pE){let qa=+a.qty||0,ev=[],q0=qa-sum(a.aps||[],x=>+x.q||0)+sum(a.vds||[],x=>+x.q||0),c0=(+a.applied||0)-apSum(a)+vdC(a);
+if(a.date)ev.push([a.date,q0,q0>0?c0/q0:null,0]);(a.aps||[]).forEach(x=>ev.push([x.date,+x.q||0,+x.q>0?+x.v/+x.q:null,0]));(a.vds||[]).forEach(x=>ev.push([x.date,-(+x.q||0),+x.q>0?+x.v/+x.q:null,1]));
+ev.sort((x,y)=>x[0].localeCompare(y[0])||x[3]-y[3]);let q=sum(ev.filter(x=>x[0]<=S),x=>x[1]),f=1,used=0,ps=q>1e-9?pS:null;if(q>1e-9&&!(pS>0))return null;
+for(let x of ev){if(x[0]<=S||x[0]>E)continue;if(!(x[2]>0))return null;if(q>1e-9){f*=x[2]/ps;used=1}q+=x[1];ps=x[2]}
+if(q>1e-9){if(!(pE>0))return null;f*=pE/ps;used=1}return used?f-1:null}
+function perRet(bk,k){let now=curK(),live=k>=now,td=iso(new Date()),S=mEnd(bk),E=live?td:mEnd(k),T=Math.max(1,dN(E)-dN(S)),g=0,nw=0,dw=0,est=0;
+inIn().forEach(a=>{if(a.date&&a.date>E)return;let b=aValAt(a,bk),vb,ve,fl=aFlows(a,S,E),cur=aVal(a);
+if(b.none)vb=0;else if(b.v!=null)vb=b.v;else{est=1;vb=b.c!=null?b.c:cur.cost}
+if(live)ve=isClosed(a)?0:cur.value;else{let o=aValAt(a,k);if(o.none)ve=0;else if(o.v!=null)ve=o.v;else{est=1;ve=isClosed(a)&&(a.vds||[]).every(x=>x.date<=E)?0:cur.value}}
+let gi=ve-vb-sum(fl,x=>x[1]),di=vb+sum(fl,x=>x[1]*Math.min(1,Math.max(0,(dN(E)-dN(x[0])+1)/T)));if(!(di>0))di=vb+sum(fl.filter(x=>x[1]>0),x=>x[1]);g+=gi;if(!(di>0))return;
+let key=AT[a.type]&&AT[a.type].live&&qk(a),ri=null;if(key)ri=aTwr(a,S,E,hPrice(key,bk),live?cur.price:hPrice(key,k));if(ri==null)ri=gi/di;nw+=di*ri;dw+=di});
+g=r2(g);return{r:g,p:dw>0?nw/dw*100:null,est}}
+/* Dia: o que mudou desde o fechamento de ontem; compra de hoje conta a partir do preço pago, venda de hoje até o preço de venda. A % é a variação da cota. */
+function dayRet(){let td=iso(new Date()),y=iso(new Date(Date.now()-864e5)),g=0,nw=0,dw=0;inIn().forEach(a=>{let v=aVal(a);if(v.price==null||v.chg==null||!isFinite(v.chg)||v.old||!v.at||!(AT[a.type]&&AT[a.type].live))return;
+let p0=v.price/(1+v.chg/100),q=+a.qty||0,q0=a.date&&a.date>y?0:q-sum((a.aps||[]).filter(x=>x.date>y),x=>+x.q||0)+sum((a.vds||[]).filter(x=>x.date>y),x=>+x.q||0),fl=aFlows(a,y,td),gi=q*v.price-q0*p0-sum(fl,x=>x[1]),di=q0*p0+sum(fl.filter(x=>x[1]>0),x=>x[1]);
+g+=gi;if(!(di>0))return;let ri=aTwr(a,y,td,p0,v.price);if(ri==null)ri=gi/di;nw+=di*ri;dw+=di});g=r2(g);return{r:g,p:dw>0?nw/dw*100:null}}
 const rCell=(l,v,p)=>{let c=v<0?'rd':v>0?'gr':'';return`<div><small>${l}</small><b class="${c}">${p==null?'—':(p>0?'+':'')+nf(p)+'%'}</b><span class="${c}">${v>0?'+':''}${money(v)}</span></div>`};
 function invCard(){let all=db.inv.map(a=>({a,v:aVal(a)})),C=all.filter(x=>isClosed(x.a)),all2=all.filter(x=>!C.includes(x)),L=all2.filter(x=>!x.a.out),X=all2.filter(x=>x.a.out),tot=sum(L,x=>r2(x.v.value)),cost=sum(L,x=>r2(x.v.cost)),g=tot-cost,rk=ym()>curK()?curK():ym(),rl=rk===curK(),rmn=M[+rk.slice(5,7)-1].toLowerCase(),dR=rl?dayRet():null,mR=perRet(ymAdd(rk,-1),rk),yR=perRet((rk.slice(0,4)-1)+'-12',rk);
 let gr=[...TGS(),NOTAG].map(t=>({t,L:L.filter(x=>tagOf(x.a)===t)})).filter(x=>x.L.length).map(x=>({...x,v:sum(x.L,y=>y.v.value)})).sort((a,b)=>b.v-a.v);
