@@ -237,7 +237,7 @@ small .bub{font-size:1.15em}.mn>b .bub,.row>span>.bub,.rw>b>.bub{width:1.9em;hei
 .bkb{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--in);border-radius:12px;padding:12px 14px;margin-top:8px;color:var(--tx)}.bkb b{display:block;font-size:14px}.bkb small{display:block;margin-top:2px}.bkb.dg{border-color:color-mix(in srgb,var(--r) 50%,var(--line))}.bkb.dg b{color:var(--r)}
 .bkf{position:relative;overflow:hidden;cursor:pointer}.bkf input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .sumt td{padding:6px 4px}
-.ivs small,.ivs b{display:block}.ivs b{font-size:15px;margin-top:2px}.ivr{margin-top:12px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}.g3>div{background:var(--in);border-radius:10px;padding:9px 8px;text-align:center;min-width:0}.g3 small,.g3 b,.g3 span{display:block}.g3 b{font-size:17px;margin:2px 0}.g3 span{font-size:12px}.qst{font-size:12px;color:var(--mu);margin-top:6px;line-height:1.45}.spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.ivs small,.ivs b{display:block}.ivs b{font-size:15px;margin-top:2px}.ivr{margin-top:12px}.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}.g3.g2{grid-template-columns:repeat(2,1fr)}.g3>div{background:var(--in);border-radius:10px;padding:9px 8px;text-align:center;min-width:0}.g3 small,.g3 b,.g3 span{display:block}.g3 b{font-size:17px;margin:2px 0}.g3 span{font-size:12px}.qst{font-size:12px;color:var(--mu);margin-top:6px;line-height:1.45}.spin{display:inline-block;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
 .agh{display:flex;justify-content:space-between;align-items:baseline;margin:16px 0 2px;padding-bottom:6px;border-bottom:1px solid var(--line)}.agh b{font-size:13px}
 .ast{cursor:pointer;gap:10px;align-items:center}.ast .mn{flex:1;min-width:0}.ast .mn small{display:block;white-space:normal}.av{text-align:right;flex:none}.av b{display:block}.av small{display:block;font-size:11.5px}
 .aic{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;flex:none;color:#fff;font-size:10.5px;font-weight:800;letter-spacing:-.3px}.aic.e{background:var(--in);border:1px solid var(--line);font-size:17px;color:var(--tx)}
@@ -1089,16 +1089,28 @@ const tagOf=a=>TGS().find(t=>t.id===a.tag)||NOTAG;
 function donut(gr,tot){let o=0,h=gr.filter(x=>x.v>0).map(x=>{let p=tot?x.v/tot*100:0,g=gr.length>1&&p<99.9?.6:0,c=`<circle r="15.9155" cx="18" cy="18" fill="none" stroke="${x.t.c}" stroke-width="4.2" stroke-dasharray="${Math.max(0,p-g).toFixed(3)} ${(100-Math.max(0,p-g)).toFixed(3)}" stroke-dashoffset="${(-o).toFixed(3)}"><title>${esc(x.t.n)}: ${nf(p,1)}%</title></circle>`;o+=p;return c}).join('');
 return`<div class="dn"><svg viewBox="0 0 36 36" role="img" aria-label="Divisão da carteira por tag"><g transform="rotate(-90 18 18)"><circle r="15.9155" cx="18" cy="18" fill="none" stroke="var(--in)" stroke-width="4.2"/>${h}</g></svg><div class="dnc"><small>Saldo total</small><b>${money(tot)}</b></div></div>`}
 function aRowC(a){let L=(a.vds||[]).slice().sort((x,y)=>x.date.localeCompare(y.date)),z=L[L.length-1],p=sum(L,rzOf),cs=sum(L,x=>+x.c||0);return`<div class="row ast" onclick="assetForm('${a.id}')">${aIco(a)}<div class="mn"><b>${esc(a.name)}</b><small>${vdQ(a)?'Vendido':'Resgatado'} em ${brD(z.date)}${L.length>1?' · '+L.length+(vdQ(a)?' vendas':' resgates'):''} · recebeu ${money(sum(L,x=>+x.v||0))}</small></div><div class="av"><b class="${p<0?'rd':'gr'}">${p>=0?'+':''}${money(p)}</b><small class="mu">${cs?nf(p/cs*100)+'% · ':''}realizado</small></div></div>`}
-/* Rentabilidade do mês e do ano: quanto os ativos de hoje variaram desde o fim do mês-base (cotação de fechamento daquele mês),
-   descontando o que foi aplicado depois e somando o lucro realizado em vendas no período. Ativo comprado no período conta a partir do preço de compra. */
-function perRet(bk){let g=0,d=0,est=0;inIn().forEach(a=>{let v=aVal(a),b=aValAt(a,bk);if(b.none)b={v:0,c:0};else if(b.nod||b.miss){b={v:v.cost,c:v.cost};est=1}
-let dc=v.cost-b.c;g+=v.value-b.v-dc;d+=b.v+Math.max(0,dc)});for(let k=ymAdd(bk,1);k<=curK();k=ymAdd(k,1))g+=rzIn(k);g=r2(g);return{r:g,p:d>0?g/d*100:null,est}}
+/* Rentabilidade de um período (fim do mês bk até o fim do mês k, ou até hoje): para cada ativo,
+   valor no fim − valor no início − compras do período + o que entrou com vendas do período.
+   (a 1ª compra é o aplicado − aportes + o custo do que já foi vendido, porque a venda tira esse custo do aplicado.)
+   A porcentagem divide pelo capital médio do período (método Dietz): dinheiro que entrou no meio do período pesa só pelos dias que ficou investido. */
+const dN=d=>Math.round(new Date(d+'T12:00:00')/864e5);
+function aFlows(a,S,E){let f=[],t=trn(a);t[0].v+=vdC(a);t.forEach(x=>{if(x.date&&x.date>S&&x.date<=E&&x.v)f.push([x.date,+x.v])});(a.vds||[]).forEach(x=>{if(x.date>S&&x.date<=E)f.push([x.date,-(+x.v||0)])});return f}
+function perRet(bk,k){let now=curK(),live=k>=now,td=iso(new Date()),S=mEnd(bk),E=live?td:mEnd(k),T=Math.max(1,dN(E)-dN(S)),g=0,d=0,d2=0,est=0;
+inIn().forEach(a=>{if(a.date&&a.date>E)return;let b=aValAt(a,bk),vb,ve,fl=aFlows(a,S,E);
+if(b.none)vb=0;else if(b.v!=null)vb=b.v;else{est=1;vb=b.c!=null?b.c:aVal(a).cost}
+if(live)ve=isClosed(a)?0:aVal(a).value;else{let o=aValAt(a,k);if(o.none)ve=0;else if(o.v!=null)ve=o.v;else{est=1;ve=isClosed(a)&&(a.vds||[]).every(x=>x.date<=E)?0:aVal(a).value}}
+g+=ve-vb-sum(fl,x=>x[1]);d+=vb+sum(fl,x=>x[1]*Math.min(1,Math.max(0,(dN(E)-dN(x[0])+1)/T)));d2+=vb+sum(fl.filter(x=>x[1]>0),x=>x[1])});
+g=r2(g);let dd=d>0?d:d2;return{r:g,p:dd>0?g/dd*100:null,est}}
+/* Dia: o que mudou desde o fechamento de ontem, com a quantidade que você tinha ontem; compra de hoje conta a partir do preço pago, venda de hoje até o preço de venda. */
+function dayRet(){let td=iso(new Date()),y=iso(new Date(Date.now()-864e5)),g=0,d=0;inIn().forEach(a=>{let v=aVal(a);if(v.price==null||v.chg==null||!isFinite(v.chg)||v.old||!v.at||!(AT[a.type]&&AT[a.type].live))return;
+let p0=v.price/(1+v.chg/100),q=+a.qty||0,q0=a.date&&a.date>y?0:q-sum((a.aps||[]).filter(x=>x.date>y),x=>+x.q||0)+sum((a.vds||[]).filter(x=>x.date>y),x=>+x.q||0),fl=aFlows(a,y,td),bu=sum(fl.filter(x=>x[1]>0),x=>x[1]);
+g+=q*v.price-q0*p0-sum(fl,x=>x[1]);d+=q0*p0+bu});g=r2(g);return{r:g,p:d>0?g/d*100:null}}
 const rCell=(l,v,p)=>{let c=v<0?'rd':v>0?'gr':'';return`<div><small>${l}</small><b class="${c}">${p==null?'—':(p>0?'+':'')+nf(p)+'%'}</b><span class="${c}">${v>0?'+':''}${money(v)}</span></div>`};
-function invCard(){let all=db.inv.map(a=>({a,v:aVal(a)})),C=all.filter(x=>isClosed(x.a)),all2=all.filter(x=>!C.includes(x)),L=all2.filter(x=>!x.a.out),X=all2.filter(x=>x.a.out),tot=sum(L,x=>r2(x.v.value)),cost=sum(L,x=>r2(x.v.cost)),g=tot-cost,day=sum(L,x=>x.v.day||0),pd=tot-day>0?day/(tot-day)*100:null,mR=perRet(ymAdd(curK(),-1)),yR=perRet((curK().slice(0,4)-1)+'-12');
+function invCard(){let all=db.inv.map(a=>({a,v:aVal(a)})),C=all.filter(x=>isClosed(x.a)),all2=all.filter(x=>!C.includes(x)),L=all2.filter(x=>!x.a.out),X=all2.filter(x=>x.a.out),tot=sum(L,x=>r2(x.v.value)),cost=sum(L,x=>r2(x.v.cost)),g=tot-cost,rk=ym()>curK()?curK():ym(),rl=rk===curK(),rmn=M[+rk.slice(5,7)-1].toLowerCase(),dR=rl?dayRet():null,mR=perRet(ymAdd(rk,-1),rk),yR=perRet((rk.slice(0,4)-1)+'-12',rk);
 let gr=[...TGS(),NOTAG].map(t=>({t,L:L.filter(x=>tagOf(x.a)===t)})).filter(x=>x.L.length).map(x=>({...x,v:sum(x.L,y=>y.v.value)})).sort((a,b)=>b.v-a.v);
 return`<div class="card wide"><div class="row" style="padding:0;align-items:center"><h2 style="margin:0">Carteira de investimentos</h2><button class="vt" onclick="qRefresh(1)">↻ Atualizar</button></div><div id="qst" class="qst">${qStat()}</div>
 <div class="dnw">${donut(gr,tot)}<div class="dnl">${gr.map(x=>`<div><i style="background:${x.t.c}"></i><span>${esc(x.t.n)}</span><b>${tot?nf(x.v/tot*100,1):'0,0'}%</b><small>${money(x.v)}</small></div>`).join('')||'<small>Cadastre um ativo para ver a divisão da carteira.</small>'}</div></div>
-<div class="ivr"><small>Rentabilidade</small><div class="g3">${rCell('Hoje',day,pd)}${rCell('No mês',mR.r,mR.p)}${rCell('No ano',yR.r,yR.p)}</div></div>
+<div class="ivr"><small>Rentabilidade</small><div class="g3${rl?'':' g2'}">${rl?rCell('Hoje',dR.r,dR.p):''}${rCell('Em '+rmn,mR.r,mR.p)}${rCell(rl?'Em '+rk.slice(0,4):rk.slice(0,4)+' até '+rmn,yR.r,yR.p)}</div>${mR.est||yR.est?'<small class="mu">Ativos sem cotação histórica (como os de valor informado à mão) entram pelo valor de compra.</small>':''}</div>
 ${gr.map(x=>`<div class="agh"><b><i class="tgd" style="background:${x.t.c}"></i>${esc(x.t.n)}</b><small>${money(x.v)}</small></div>${x.L.map(y=>aRow(y.a)).join('')}`).join('')}
 ${X.length?`<div class="agh"><b>Fora do saldo total</b><small>${money(sum(X,y=>y.v.value))}</small></div><small class="mu">Estes ativos aparecem só aqui. Não entram no anel, no saldo nem na tela inicial.</small>${X.map(y=>aRow(y.a,1)).join('')}`:''}
 ${C.length?`<div class="agh"><b>Encerrados</b><small>${(()=>{let p=sum(C,y=>sum(y.a.vds,rzOf));return(p>=0?'+':'')+money(p)+' realizado'})()}</small></div><small class="mu">Ativos que você vendeu ou resgatou por completo. Toque para ver as vendas; excluir uma venda devolve o ativo para a carteira.</small>${C.map(y=>aRowC(y.a)).join('')}`:''}
@@ -1124,7 +1136,7 @@ HS.busy=false;hSave();if(page==='wealth'&&!$('#modal').classList.contains('open'
 function aValAt(a,k){let e=mEnd(k),ty=a.type||'outro',q=+a.qty||0,c=+a.applied||0;if(!a.date)return{nod:1};if(a.date>e)return{none:1};
 let vf=(a.vds||[]).filter(x=>x.date>e);c=c-apFut(a,e)+sum(vf,x=>+x.c||0);q=q-sum((a.aps||[]).filter(x=>x.date>e),x=>+x.q||0)+sum(vf,x=>+x.q||0);if(RFT.includes(ty))c=rfCost(a,e);if(ty==='tesouro'||ty==='rf')return{v:rfCalc(a,e).v,c};
 if(ty==='poup')return{v:poupV(a,e),c};
-let key=ty!=='ext'&&qk(a);if(key){let p=hPrice(key,k);if(p!=null)return{v:q*p,c}}return{miss:1}}
+let key=ty!=='ext'&&qk(a);if(key){let p=hPrice(key,k);if(p!=null)return{v:q*p,c}}return{miss:1,c}}
 function rtData(n){let now=curK(),e=ym()>now?now:ym(),A=inIn(),tags=[...TGS(),NOTAG],a=[];
 for(let i=n-1;i>=0;i--){let k=ymAdd(e,-i),r={k,l:M[+k.slice(5,7)-1],t:{},src:''};
 if(k===now){r.src='live';A.forEach(x=>{let id=tid(tagOf(x)),v=aVal(x);r.t[id]=r.t[id]||{v:0,c:0};r.t[id].v+=v.value;r.t[id].c+=v.cost})}
